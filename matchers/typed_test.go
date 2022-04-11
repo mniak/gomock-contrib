@@ -23,7 +23,7 @@ func TestTyped(t *testing.T) {
 			assert.True(t, sut.Matches(gofakeit.SentenceSimple()), "should match string")
 		})
 
-		t.Run("type=String", func(t *testing.T) {
+		t.Run("type=Int", func(t *testing.T) {
 			sut := Typed[int]()
 
 			assert.False(t, sut.Matches(gofakeit.SentenceSimple()), "should match string")
