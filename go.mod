@@ -3,7 +3,7 @@ module github.com/mniak/gomock-contrib
 go 1.18
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.15.0
+	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/golang/mock v1.6.0
 	github.com/likexian/gokit v0.25.6
 	github.com/stretchr/testify v1.7.1
