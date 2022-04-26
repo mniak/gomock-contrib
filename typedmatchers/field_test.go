@@ -17,10 +17,11 @@ type StructForFieldMatcherTest struct {
 
 func TestFieldMatcher(t *testing.T) {
 	expectedString := gofakeit.SentenceSimple()
+	expectedMatcherString := "value should be exactly the same"
 
 	sut := MatchField[StructForFieldMatcherTest, string](func(x StructForFieldMatcherTest) string {
 		return x.StringField1
-	}, Inline("value should be exactly the same", func(x string) bool {
+	}, Inline(expectedMatcherString, func(x string) bool {
 		return x == expectedString
 	}))
 
@@ -30,6 +31,8 @@ func TestFieldMatcher(t *testing.T) {
 
 	fakeStruct.StringField1 = expectedString
 	assert.True(t, sut.Matches(fakeStruct), "when struct HAS the expected string, should match")
+
+	assert.Equal(t, expectedMatcherString, sut.String())
 }
 
 func TestFieldMatcherInterface(t *testing.T) {
