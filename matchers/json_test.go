@@ -24,6 +24,10 @@ type StructForTestsWithJSON struct {
 	ExtraField string
 }
 
+func (s StructForTestsWithJSON) Clone() StructForTestsWithJSON {
+	return s
+}
+
 func TestJSON(t *testing.T) {
 	t.Run("When type is not string, should fail", func(t *testing.T) {
 		m := JSON("{}")
@@ -85,21 +89,6 @@ func TestJSON(t *testing.T) {
 		assert.False(t, m.Matches(string(jsonBytes)), "As string should fail")
 	})
 
-	t.Run("When field has different value, should NOT match", func(t *testing.T) {
-		var sample StructForTestsWithJSON
-		gofakeit.Struct(&sample)
-		m := JSON(fmt.Sprintf(`{
-			"FieldString": "different value",
-			"FieldInt": %d,
-		}`, sample.FieldInt))
-
-		jsonBytes, err := json.Marshal(sample)
-		require.NoError(t, err)
-
-		assert.False(t, m.Matches(jsonBytes), "As bytes should fail")
-		assert.False(t, m.Matches(string(jsonBytes)), "As string should fail")
-	})
-
 	t.Run("With subfield on expression is not on JSON, should NOT match", func(t *testing.T) {
 		var sample StructForTestsWithJSON
 		gofakeit.Struct(&sample)
@@ -117,19 +106,39 @@ func TestJSON(t *testing.T) {
 		assert.False(t, m.Matches(string(jsonBytes)), "As string should fail")
 	})
 
+	t.Run("When field has different value, should NOT match", func(t *testing.T) {
+		var sample StructForTestsWithJSON
+		gofakeit.Struct(&sample)
+		changedSample := sample.Clone()
+		changedSample.FieldString = gofakeit.SentenceSimple()
+
+		changedSampleBytes, err := json.Marshal(changedSample)
+		require.NoError(t, err)
+
+		m := JSON(string(changedSampleBytes))
+
+		sampleBytes, err := json.Marshal(sample)
+		require.NoError(t, err)
+
+		assert.False(t, m.Matches(sampleBytes), "As bytes should fail")
+		assert.False(t, m.Matches(string(sampleBytes)), "As string should fail")
+	})
+
 	t.Run("When subfield has different value, should NOT match", func(t *testing.T) {
 		var sample StructForTestsWithJSON
 		gofakeit.Struct(&sample)
-		m := JSON(fmt.Sprintf(`{
-			"FieldString": "%s",
-			"FieldStruct": {
-				"SubFieldString": "different value"
-			},
-		}`, sample.FieldString))
-		jsonBytes, err := json.Marshal(sample)
+		changedSample := sample.Clone()
+		changedSample.FieldStruct.SubFieldString = gofakeit.SentenceSimple()
+
+		changedSampleBytes, err := json.Marshal(changedSample)
 		require.NoError(t, err)
 
-		assert.False(t, m.Matches(jsonBytes), "As bytes should fail")
-		assert.False(t, m.Matches(string(jsonBytes)), "As string should fail")
+		m := JSON(string(changedSampleBytes))
+
+		sampleBytes, err := json.Marshal(sample)
+		require.NoError(t, err)
+
+		assert.False(t, m.Matches(sampleBytes), "As bytes should fail")
+		assert.False(t, m.Matches(string(sampleBytes)), "As string should fail")
 	})
 }
