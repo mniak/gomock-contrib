@@ -23,6 +23,7 @@ func TestInlineJSON(t *testing.T) {
 		assert.True(t, m.Matches(`{}`), "empty JSON object should match")
 		assert.False(t, m.Matches(`{`), "Invalid JSON should cause failure")
 		assert.False(t, m.Matches(`abc123`), "String should cause failure")
+		assert.False(t, m.Matches(`"abc123"`), "Quoted String should cause failure")
 		assert.False(t, m.Matches(`123`), "int should cause failure")
 		assert.False(t, m.Matches(``), "empty string should cause failure")
 	})
