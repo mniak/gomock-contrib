@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,6 +24,21 @@ func Test_fieldMatcher(t *testing.T) {
 		}, Inline("value should be exactly the same", func(x string) bool {
 			return x == expectedString
 		}))
+
+		var fakeStruct StructForFieldMatcherTest
+		gofakeit.Struct(&fakeStruct)
+		assert.False(t, sut.Matches(fakeStruct), "when struct DOES NOT have the expected string, should NOT match")
+
+		fakeStruct.StringField1 = expectedString
+		assert.True(t, sut.Matches(fakeStruct), "when struct HAS the expected string, should match")
+	})
+
+	t.Run("Using gomock.Eq matcher", func(t *testing.T) {
+		expectedString := gofakeit.SentenceSimple()
+
+		sut := MatchField[StructForFieldMatcherTest, any](func(x StructForFieldMatcherTest) any {
+			return x.StringField1
+		}, gomock.Eq(expectedString))
 
 		var fakeStruct StructForFieldMatcherTest
 		gofakeit.Struct(&fakeStruct)
