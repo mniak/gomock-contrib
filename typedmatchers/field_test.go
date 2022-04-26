@@ -15,36 +15,49 @@ type StructForFieldMatcherTest struct {
 	StringField2 string
 }
 
-func Test_fieldMatcher(t *testing.T) {
-	t.Run("Using typed inline matcher", func(t *testing.T) {
-		expectedString := gofakeit.SentenceSimple()
+func TestFieldMatcher(t *testing.T) {
+	expectedString := gofakeit.SentenceSimple()
 
-		sut := MatchField[StructForFieldMatcherTest, string](func(x StructForFieldMatcherTest) string {
-			return x.StringField1
-		}, Inline("value should be exactly the same", func(x string) bool {
-			return x == expectedString
-		}))
+	sut := MatchField[StructForFieldMatcherTest, string](func(x StructForFieldMatcherTest) string {
+		return x.StringField1
+	}, Inline("value should be exactly the same", func(x string) bool {
+		return x == expectedString
+	}))
 
-		var fakeStruct StructForFieldMatcherTest
-		gofakeit.Struct(&fakeStruct)
-		assert.False(t, sut.Matches(fakeStruct), "when struct DOES NOT have the expected string, should NOT match")
+	var fakeStruct StructForFieldMatcherTest
+	gofakeit.Struct(&fakeStruct)
+	assert.False(t, sut.Matches(fakeStruct), "when struct DOES NOT have the expected string, should NOT match")
 
-		fakeStruct.StringField1 = expectedString
-		assert.True(t, sut.Matches(fakeStruct), "when struct HAS the expected string, should match")
-	})
+	fakeStruct.StringField1 = expectedString
+	assert.True(t, sut.Matches(fakeStruct), "when struct HAS the expected string, should match")
+}
 
-	t.Run("Using gomock.Eq matcher", func(t *testing.T) {
-		expectedString := gofakeit.SentenceSimple()
+func TestFieldMatcherInterface(t *testing.T) {
+	expectedString := gofakeit.SentenceSimple()
 
-		sut := MatchField[StructForFieldMatcherTest, any](func(x StructForFieldMatcherTest) any {
-			return x.StringField1
-		}, gomock.Eq(expectedString))
+	sut := MatchFieldInterface(func(x StructForFieldMatcherTest) any {
+		return x.StringField1
+	}, gomock.Eq(expectedString))
 
-		var fakeStruct StructForFieldMatcherTest
-		gofakeit.Struct(&fakeStruct)
-		assert.False(t, sut.Matches(fakeStruct), "when struct DOES NOT have the expected string, should NOT match")
+	var fakeStruct StructForFieldMatcherTest
+	gofakeit.Struct(&fakeStruct)
+	assert.False(t, sut.Matches(fakeStruct), "when struct DOES NOT have the expected string, should NOT match")
 
-		fakeStruct.StringField1 = expectedString
-		assert.True(t, sut.Matches(fakeStruct), "when struct HAS the expected string, should match")
-	})
+	fakeStruct.StringField1 = expectedString
+	assert.True(t, sut.Matches(fakeStruct), "when struct HAS the expected string, should match")
+}
+
+func TestFieldEqual(t *testing.T) {
+	expectedString := gofakeit.SentenceSimple()
+
+	sut := FieldEqual(func(x StructForFieldMatcherTest) string {
+		return x.StringField1
+	}, expectedString)
+
+	var fakeStruct StructForFieldMatcherTest
+	gofakeit.Struct(&fakeStruct)
+	assert.False(t, sut.Matches(fakeStruct), "when struct DOES NOT have the expected string, should NOT match")
+
+	fakeStruct.StringField1 = expectedString
+	assert.True(t, sut.Matches(fakeStruct), "when struct HAS the expected string, should match")
 }

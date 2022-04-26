@@ -1,5 +1,7 @@
 package typedmatchers
 
+import "github.com/golang/mock/gomock"
+
 type fieldMatcher[T any, F any] struct {
 	selector func(x T) F
 	matcher  Matcher[F]
@@ -21,6 +23,15 @@ func (m fieldMatcher[T, F]) String() string {
 	return m.String()
 }
 
-// func FieldEqual[T any, F any](fieldSelector func(x T) F, expectedValue F) fieldMatcher[T, F] {
-// 	return MatchField(fieldSelector, gomock.Eq)
-// }
+func MatchFieldInterface[T any](fieldSelector func(x T) any, matcher Matcher[any]) fieldMatcher[T, any] {
+	return fieldMatcher[T, any]{
+		selector: fieldSelector,
+		matcher:  matcher,
+	}
+}
+
+func FieldEqual[T any, F any](fieldSelector func(x T) F, expectedValue F) fieldMatcher[T, any] {
+	return MatchFieldInterface(func(x T) any {
+		return fieldSelector(x)
+	}, gomock.Eq(expectedValue))
+}
