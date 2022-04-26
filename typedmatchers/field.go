@@ -20,7 +20,7 @@ func (m fieldMatcher[T, F]) Matches(x T) bool {
 }
 
 func (m fieldMatcher[T, F]) String() string {
-	return m.String()
+	return m.matcher.String()
 }
 
 func MatchFieldInterface[T any](fieldSelector func(x T) any, matcher Matcher[any]) fieldMatcher[T, any] {
