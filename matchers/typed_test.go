@@ -9,8 +9,10 @@ import (
 )
 
 var (
-	_ gomock.Matcher = &typedMatcher[string]{}
-	_ gomock.Matcher = &typedMatcher[int32]{}
+	_ gomock.Matcher = typedMatcher[string]{}
+	_ gomock.Matcher = typedMatcher[int32]{}
+	_ gomock.Matcher = Typed[string]()
+	_ gomock.Matcher = Typed[int32]()
 )
 
 func TestTyped(t *testing.T) {

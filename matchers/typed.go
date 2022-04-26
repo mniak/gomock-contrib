@@ -30,15 +30,18 @@ func Typed[T any](matchers ...typedmatchers.Matcher[T]) typedMatcher[T] {
 	}
 }
 
-func (m *typedMatcher[T]) Matches(x interface{}) bool {
-	val, is := x.(T)
-	if !is {
+func (m typedMatcher[T]) Matches(x interface{}) bool {
+	switch val := x.(type) {
+	case T:
+		return m.typedMatcher.Matches(val)
+	case *T:
+		return m.typedMatcher.Matches(*val)
+	default:
 		return false
 	}
-	return m.typedMatcher.Matches(val)
 }
 
-func (m *typedMatcher[T]) String() string {
+func (m typedMatcher[T]) String() string {
 	if m.message != "" {
 		return m.message
 	}
