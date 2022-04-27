@@ -3,6 +3,7 @@ package matchers
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -140,5 +141,294 @@ func TestJSON(t *testing.T) {
 
 		assert.False(t, m.Matches(sampleBytes), "As bytes should fail")
 		assert.False(t, m.Matches(string(sampleBytes)), "As string should fail")
+	})
+}
+
+func Test_matchMaps(t *testing.T) {
+	t.Run("When maps are different, should not match", func(t *testing.T) {
+		fakenumber := int(gofakeit.Int32())
+		faketext := gofakeit.SentenceSimple()
+
+		testdata := []struct {
+			name     string
+			expected map[string]any
+			actual   map[string]any
+		}{
+			{
+				name: "fields have different types: Int/String",
+				expected: map[string]any{
+					"field1": fakenumber,
+				},
+				actual: map[string]any{
+					"field1": strconv.Itoa(fakenumber),
+				},
+			},
+			{
+				name: "fields have different types: String/Int",
+				expected: map[string]any{
+					"field1": strconv.Itoa(fakenumber),
+				},
+				actual: map[string]any{
+					"field1": fakenumber,
+				},
+			},
+			{
+				name: "fields have same type but different value",
+				expected: map[string]any{
+					"field1": faketext,
+				},
+				actual: map[string]any{
+					"field1": faketext + "-suffix",
+				},
+			},
+			// With sub struct
+			{
+				name: "fields have different types: Int/String",
+				expected: map[string]any{
+					"root": map[string]any{
+						"field1": fakenumber,
+					},
+				},
+				actual: map[string]any{
+					"root": map[string]any{
+						"field1": strconv.Itoa(fakenumber),
+					},
+				},
+			},
+			{
+				name: "fields have different types: String/Int",
+				expected: map[string]any{
+					"root": map[string]any{
+						"field1": strconv.Itoa(fakenumber),
+					},
+				},
+				actual: map[string]any{
+					"root": map[string]any{
+						"field1": fakenumber,
+					},
+				},
+			},
+			{
+				name: "fields have same type but different value",
+				expected: map[string]any{
+					"root": map[string]any{
+						"field1": faketext,
+					},
+				},
+				actual: map[string]any{
+					"root": map[string]any{
+						"field1": faketext + "-suffix",
+					},
+				},
+			},
+			// equal, but expecting more fields
+			{
+				name: "actual empty, expecting more fields",
+				expected: map[string]any{
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+				},
+				actual: map[string]any{},
+			},
+			{
+				name: "expecting more fields",
+				expected: map[string]any{
+					"string":        faketext,
+					"int":           fakenumber,
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+				},
+				actual: map[string]any{
+					"string": faketext,
+					"int":    fakenumber,
+				},
+			},
+			{
+				name: "array in wrong order",
+				expected: map[string]any{
+					"array": []string{
+						faketext + "0",
+						faketext + "1",
+					},
+				},
+				actual: map[string]any{
+					"array": []string{
+						faketext + "1",
+						faketext + "0",
+					},
+				},
+			},
+		}
+		for _, td := range testdata {
+			t.Run(td.name, func(t *testing.T) {
+				assert.False(t, matchMaps(td.expected, td.actual), "should not match")
+			})
+		}
+	})
+
+	t.Run("When map is exactly the same, should match", func(t *testing.T) {
+		testdata := []struct {
+			name  string
+			value any
+		}{
+			{
+				name:  "string",
+				value: gofakeit.SentenceSimple(),
+			},
+			// int
+			{
+				name:  "int",
+				value: int(gofakeit.Int32()),
+			},
+			{
+				name:  "int8",
+				value: gofakeit.Int8(),
+			},
+			{
+				name:  "int16",
+				value: gofakeit.Int16(),
+			},
+			{
+				name:  "int32",
+				value: gofakeit.Int32(),
+			},
+			{
+				name:  "int64",
+				value: gofakeit.Int64(),
+			},
+			// uint
+			{
+				name:  "uint",
+				value: uint(gofakeit.Uint32()),
+			},
+			{
+				name:  "uint8",
+				value: gofakeit.Uint8(),
+			},
+			{
+				name:  "uint16",
+				value: gofakeit.Uint16(),
+			},
+			{
+				name:  "uint32",
+				value: gofakeit.Uint32(),
+			},
+			{
+				name:  "uint64",
+				value: gofakeit.Uint64(),
+			},
+			// slices, maps, arrays
+			{
+				name: "map",
+				value: []string{
+					gofakeit.FarmAnimal(),
+				},
+			},
+		}
+		for _, td := range testdata {
+			t.Run(td.name, func(t *testing.T) {
+				map1 := map[string]any{
+					"field1": td.value,
+				}
+
+				map2 := map[string]any{
+					"field1": td.value,
+				}
+
+				assert.True(t, matchMaps(map1, map2), "should match")
+			})
+		}
+	})
+	t.Run("Test cases that should match", func(t *testing.T) {
+		fakenumber := int(gofakeit.Int32())
+		faketext := gofakeit.SentenceSimple()
+
+		testdata := []struct {
+			name     string
+			expected map[string]any
+			actual   map[string]any
+		}{
+			{
+				name: "exactly the same: String",
+				expected: map[string]any{
+					"field1": faketext,
+				},
+				actual: map[string]any{
+					"field1": faketext,
+				},
+			},
+			{
+				name: "exactly the same: Int",
+				expected: map[string]any{
+					"field1": fakenumber,
+				},
+				actual: map[string]any{
+					"field1": fakenumber,
+				},
+			},
+			{
+				name:     "exactly the same: empty",
+				expected: map[string]any{},
+				actual:   map[string]any{},
+			},
+			{
+				name:     "expected has less fields than actual (has none)",
+				expected: map[string]any{},
+				actual: map[string]any{
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+				},
+			},
+			{
+				name: "expected has less fields than actual (matches some)",
+				expected: map[string]any{
+					"string": faketext,
+					"int":    fakenumber,
+				},
+				actual: map[string]any{
+					"string":        faketext,
+					"int":           fakenumber,
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+					gofakeit.UUID(): gofakeit.SentenceSimple(),
+				},
+			},
+			{
+				name: "slice",
+				expected: map[string]any{
+					"slice": []string{
+						faketext,
+					},
+				},
+				actual: map[string]any{
+					"slice": []string{
+						faketext,
+					},
+				},
+			},
+			{
+				name: "slice in right order",
+				expected: map[string]any{
+					"slice": []string{
+						faketext + "0",
+						faketext + "1",
+					},
+				},
+				actual: map[string]any{
+					"slice": []string{
+						faketext + "0",
+						faketext + "1",
+					},
+				},
+			},
+		}
+		for _, td := range testdata {
+			t.Run(td.name, func(t *testing.T) {
+				assert.True(t, matchMaps(td.expected, td.actual), "should match")
+			})
+		}
 	})
 }

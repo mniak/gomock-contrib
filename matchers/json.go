@@ -49,24 +49,42 @@ func matchMaps(expectedmap, actualMap map[string]any) bool {
 		}
 		expectedReflectionValue := reflect.ValueOf(expectedValue)
 		actualReflectionValue := reflect.ValueOf(actualValue)
-		if expectedReflectionValue.Type() != actualReflectionValue.Type() {
-			return false
-		}
-		switch actualReflectionValue.Kind() {
-		case reflect.Map:
-			expectedValueAsMap, expectedIsMap := expectedValue.(map[string]any)
-			actualValueAsMap, actualIsMap := actualValue.(map[string]any)
-			if expectedIsMap && actualIsMap {
-				return matchMaps(expectedValueAsMap, actualValueAsMap)
-			}
-
-			return actualReflectionValue.Elem() == expectedReflectionValue.Elem()
-		}
-		if actualValue != expectedValue {
+		if !matchValues(expectedReflectionValue, actualReflectionValue) {
 			return false
 		}
 	}
 	return true
+}
+
+func matchValues(expected, actual reflect.Value) bool {
+	if expected.Type() != actual.Type() {
+		return false
+	}
+	switch actual.Kind() {
+	case reflect.Map:
+		for _, idx := range expected.MapKeys() {
+			expectedValue := expected.MapIndex(idx)
+			actualValue := actual.MapIndex(idx)
+			if !matchValues(expectedValue, actualValue) {
+				return false
+			}
+		}
+		return true
+	case reflect.Slice:
+		if actual.Len() != expected.Len() {
+			return false
+		}
+
+		for idx := 0; idx < actual.Len(); idx++ {
+			expectedValue := expected.Index(idx)
+			actualValue := actual.Index(idx)
+			if !matchValues(expectedValue, actualValue) {
+				return false
+			}
+		}
+		return true
+	}
+	return actual.Interface() == expected.Interface()
 }
 
 func (m jsonMatcher) String() string {
