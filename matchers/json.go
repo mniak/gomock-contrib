@@ -1,6 +1,9 @@
 package matchers
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"reflect"
+)
 
 type jsonMatcher struct {
 	expected []byte
@@ -35,12 +38,31 @@ func matchBytes(expected, data []byte) bool {
 	if err != nil {
 		return false
 	}
+	return matchMaps(expectedmap, datamap)
+}
 
-	for ek, ev := range expectedmap {
-		dv, has := datamap[ek]
-		if !has ||
-			ev == nil && dv != nil ||
-			dv == nil && ev != nil {
+func matchMaps(expectedmap, actualMap map[string]any) bool {
+	for key, expectedValue := range expectedmap {
+		actualValue, found := actualMap[key]
+		if !found {
+			return false
+		}
+		expectedReflectionValue := reflect.ValueOf(expectedValue)
+		actualReflectionValue := reflect.ValueOf(actualValue)
+		if expectedReflectionValue.Type() != actualReflectionValue.Type() {
+			return false
+		}
+		switch actualReflectionValue.Kind() {
+		case reflect.Map:
+			expectedValueAsMap, expectedIsMap := expectedValue.(map[string]any)
+			actualValueAsMap, actualIsMap := actualValue.(map[string]any)
+			if expectedIsMap && actualIsMap {
+				return matchMaps(expectedValueAsMap, actualValueAsMap)
+			}
+
+			return actualReflectionValue.Elem() == expectedReflectionValue.Elem()
+		}
+		if actualValue != expectedValue {
 			return false
 		}
 	}
