@@ -29,9 +29,10 @@ func (m fieldMatcher[T, F]) Matches(x T) bool {
 }
 
 func (m fieldMatcher[T, F]) String() string {
-	return fmt.Sprintf("Field %s %s", m.fieldName, m.matcher.String())
+	return fmt.Sprintf("field %s %s", m.fieldName, m.matcher.String())
 }
 
 func (m fieldMatcher[T, F]) Got(actual T) string {
-	return fmt.Sprintf("Field %s: %s", m.fieldName, formatGottenArg(m.matcher, actual))
+	fieldValue := m.selector(actual)
+	return fmt.Sprintf("field %s: %s", m.fieldName, formatGottenArg(m.matcher, fieldValue))
 }

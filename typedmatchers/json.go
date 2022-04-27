@@ -35,9 +35,22 @@ func (m jsonMatcher[T]) Matches(actual T) bool {
 }
 
 func (m jsonMatcher[T]) String() string {
-	return fmt.Sprintf("shoud be a valid JSON matching %+v", m.expected)
+	pretty, err := json.MarshalIndent(m.expected, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("shoud be JSON matching %+v", m.expected)
+	}
+	return fmt.Sprintf("shoud be JSON matching %s", pretty)
 }
 
-func (m jsonMatcher[T]) Got(got T) string {
-	return "aaaaa"
+func (m jsonMatcher[T]) Got(actual T) string {
+	var actualmap map[string]any
+	err := json.Unmarshal([]byte(actual), &actualmap)
+	if err != nil {
+		return fmt.Sprintf("%+v (%T)", actual, actual)
+	}
+	pretty, err := json.MarshalIndent(actualmap, "", "  ")
+	if err != nil {
+		return fmt.Sprintf("%+v (%T)", actual, actual)
+	}
+	return fmt.Sprintf("shoud be JSON matching %s", pretty)
 }
