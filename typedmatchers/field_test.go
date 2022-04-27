@@ -1,6 +1,7 @@
 package typedmatchers
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -8,7 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var _ Matcher[bool] = fieldMatcher[bool, string]{}
+var (
+	_ Matcher[bool]      = fieldMatcher[bool, string]{}
+	_ GotFormatter[bool] = fieldMatcher[bool, string]{}
+)
 
 type StructForFieldMatcherTest struct {
 	StringField1 string
@@ -17,13 +21,15 @@ type StructForFieldMatcherTest struct {
 
 func TestFieldMatcher(t *testing.T) {
 	expectedString := gofakeit.SentenceSimple()
-	expectedMatcherString := "value should be exactly the same"
+	wantMatcherString := "value should be exactly the same"
+	expectedMatcherString := fmt.Sprintf("field StringField1 %s", wantMatcherString)
 
-	sut := MatchField[StructForFieldMatcherTest, string](func(x StructForFieldMatcherTest) string {
-		return x.StringField1
-	}, Inline(expectedMatcherString, func(x string) bool {
-		return x == expectedString
-	}))
+	sut := Field[StructForFieldMatcherTest, string](
+		"StringField1",
+		Inline(wantMatcherString, func(x string) bool {
+			return x == expectedString
+		}),
+	)
 
 	var fakeStruct StructForFieldMatcherTest
 	gofakeit.Struct(&fakeStruct)
@@ -38,9 +44,7 @@ func TestFieldMatcher(t *testing.T) {
 func TestFieldMatcherInterface(t *testing.T) {
 	expectedString := gofakeit.SentenceSimple()
 
-	sut := MatchFieldInterface(func(x StructForFieldMatcherTest) any {
-		return x.StringField1
-	}, gomock.Eq(expectedString))
+	sut := FieldGeneric[StructForFieldMatcherTest]("StringField1", gomock.Eq(expectedString))
 
 	var fakeStruct StructForFieldMatcherTest
 	gofakeit.Struct(&fakeStruct)
@@ -53,9 +57,7 @@ func TestFieldMatcherInterface(t *testing.T) {
 func TestFieldEqual(t *testing.T) {
 	expectedString := gofakeit.SentenceSimple()
 
-	sut := FieldEqual(func(x StructForFieldMatcherTest) string {
-		return x.StringField1
-	}, expectedString)
+	sut := FieldEqual[StructForFieldMatcherTest]("StringField1", expectedString)
 
 	var fakeStruct StructForFieldMatcherTest
 	gofakeit.Struct(&fakeStruct)
