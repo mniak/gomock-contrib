@@ -1,14 +1,18 @@
 package typedmatchers
 
+import "fmt"
+
 type fieldMatcher[T any, F any] struct {
-	selector func(x T) F
-	matcher  Matcher[F]
+	fieldName string
+	selector  func(x T) F
+	matcher   Matcher[F]
 }
 
-func Field[T any, F any](fieldSelector func(x T) F, matcher Matcher[F]) fieldMatcher[T, F] {
+func Field[T any, F any](fieldName string, fieldSelector func(x T) F, matcher Matcher[F]) fieldMatcher[T, F] {
 	return fieldMatcher[T, F]{
-		selector: fieldSelector,
-		matcher:  matcher,
+		fieldName: fieldName,
+		selector:  fieldSelector,
+		matcher:   matcher,
 	}
 }
 
@@ -25,9 +29,9 @@ func (m fieldMatcher[T, F]) Matches(x T) bool {
 }
 
 func (m fieldMatcher[T, F]) String() string {
-	return m.matcher.String()
+	return fmt.Sprintf("Field %s %s", m.fieldName, m.matcher.String())
 }
 
 func (m fieldMatcher[T, F]) Got(actual T) string {
-	return formatGottenArg(m.matcher, actual)
+	return fmt.Sprintf("Field %s: %s", m.fieldName, formatGottenArg(m.matcher, actual))
 }

@@ -2,6 +2,7 @@ package typedmatchers
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/mniak/gomock-contrib/internal/utils"
 )
@@ -34,7 +35,7 @@ func (m jsonMatcher[T]) Matches(actual T) bool {
 }
 
 func (m jsonMatcher[T]) String() string {
-	return "shoud be a valid JSON matching the specified map"
+	return fmt.Sprintf("shoud be a valid JSON matching %+v", m.expected)
 }
 
 func (m jsonMatcher[T]) Got(got T) string {

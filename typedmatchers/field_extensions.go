@@ -8,6 +8,6 @@ func FieldEqual[T any, F any](fieldSelector func(x T) F, expectedValue F) fieldM
 	}, gomock.Eq(expectedValue))
 }
 
-func FieldInlineJSON[T any, J any](fieldSelector func(x T) string, function func(x J) bool) any {
-	return Field[T, string](fieldSelector, InlineJSON(function))
+func FieldInlineJSON[T any, J any](fieldName string, fieldSelector func(x T) string, function func(x J) bool) any {
+	return Field[T, string](fieldName, fieldSelector, InlineJSON(function))
 }
