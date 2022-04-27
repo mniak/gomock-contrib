@@ -10,8 +10,10 @@ import (
 )
 
 var (
-	_ Matcher[string] = JSON(map[string]any{})
-	_ Matcher[[]byte] = BinaryJSON(map[string]any{})
+	_ Matcher[string]      = JSON(map[string]any{})
+	_ Matcher[[]byte]      = BinaryJSON(map[string]any{})
+	_ GotFormatter[string] = JSON(map[string]any{})
+	_ GotFormatter[[]byte] = BinaryJSON(map[string]any{})
 )
 
 type StructForTestsWithJSONObject struct {

@@ -8,7 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var _ Matcher[bool] = fieldMatcher[bool, string]{}
+var (
+	_ Matcher[bool]      = fieldMatcher[bool, string]{}
+	_ GotFormatter[bool] = fieldMatcher[bool, string]{}
+)
 
 type StructForFieldMatcherTest struct {
 	StringField1 string

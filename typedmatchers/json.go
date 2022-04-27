@@ -16,6 +16,14 @@ func matchJSON[T binary](expected map[string]any) jsonMatcher[T] {
 	}
 }
 
+func JSON(expected map[string]any) jsonMatcher[string] {
+	return matchJSON[string](expected)
+}
+
+func BinaryJSON(expected map[string]any) jsonMatcher[[]byte] {
+	return matchJSON[[]byte](expected)
+}
+
 func (m jsonMatcher[T]) Matches(actual T) bool {
 	var actualmap map[string]any
 	err := json.Unmarshal([]byte(actual), &actualmap)
@@ -29,10 +37,6 @@ func (m jsonMatcher[T]) String() string {
 	return "shoud be a valid JSON matching the specified map"
 }
 
-func JSON(expected map[string]any) jsonMatcher[string] {
-	return matchJSON[string](expected)
-}
-
-func BinaryJSON(expected map[string]any) jsonMatcher[[]byte] {
-	return matchJSON[[]byte](expected)
+func (m jsonMatcher[T]) Got(got T) string {
+	return "aaaaa"
 }

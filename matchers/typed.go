@@ -47,3 +47,17 @@ func (m typedMatcher[T]) String() string {
 	}
 	return m.typedMatcher.String()
 }
+
+func (m typedMatcher[T]) Got(actual any) string {
+	switch actual := actual.(type) {
+	case T:
+		if gs, ok := m.typedMatcher.(typedmatchers.GotFormatter[T]); ok {
+			return gs.Got(actual)
+		}
+	case *T:
+		if gs, ok := m.typedMatcher.(typedmatchers.GotFormatter[T]); ok {
+			return gs.Got(*actual)
+		}
+	}
+	return fmt.Sprintf("%+v (%T)", actual, actual)
+}
