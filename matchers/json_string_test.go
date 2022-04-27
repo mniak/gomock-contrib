@@ -97,7 +97,7 @@ func TestJSON(t *testing.T) {
 			"FieldInt": %d,
 			"FieldStruct": {
 				"InexistentSubfield": "this subfield does not exist"
-			},
+			}
 		}`, sample.FieldString, sample.FieldInt))
 		jsonBytes, err := json.Marshal(sample)
 		require.NoError(t, err)
