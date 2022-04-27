@@ -1,13 +1,11 @@
 package typedmatchers
 
-import "github.com/golang/mock/gomock"
-
 type fieldMatcher[T any, F any] struct {
 	selector func(x T) F
 	matcher  Matcher[F]
 }
 
-func MatchField[T any, F any](fieldSelector func(x T) F, matcher Matcher[F]) fieldMatcher[T, F] {
+func Field[T any, F any](fieldSelector func(x T) F, matcher Matcher[F]) fieldMatcher[T, F] {
 	return fieldMatcher[T, F]{
 		selector: fieldSelector,
 		matcher:  matcher,
@@ -23,15 +21,10 @@ func (m fieldMatcher[T, F]) String() string {
 	return m.matcher.String()
 }
 
-func MatchFieldInterface[T any](fieldSelector func(x T) any, matcher Matcher[any]) fieldMatcher[T, any] {
+func FieldGeneric[T any](fieldSelector func(x T) any, matcher Matcher[any]) fieldMatcher[T, any] {
 	return fieldMatcher[T, any]{
 		selector: fieldSelector,
 		matcher:  matcher,
 	}
 }
 
-func FieldEqual[T any, F any](fieldSelector func(x T) F, expectedValue F) fieldMatcher[T, any] {
-	return MatchFieldInterface(func(x T) any {
-		return fieldSelector(x)
-	}, gomock.Eq(expectedValue))
-}

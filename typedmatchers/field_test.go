@@ -19,7 +19,7 @@ func TestFieldMatcher(t *testing.T) {
 	expectedString := gofakeit.SentenceSimple()
 	expectedMatcherString := "value should be exactly the same"
 
-	sut := MatchField[StructForFieldMatcherTest, string](func(x StructForFieldMatcherTest) string {
+	sut := Field[StructForFieldMatcherTest, string](func(x StructForFieldMatcherTest) string {
 		return x.StringField1
 	}, Inline(expectedMatcherString, func(x string) bool {
 		return x == expectedString
@@ -38,7 +38,7 @@ func TestFieldMatcher(t *testing.T) {
 func TestFieldMatcherInterface(t *testing.T) {
 	expectedString := gofakeit.SentenceSimple()
 
-	sut := MatchFieldInterface(func(x StructForFieldMatcherTest) any {
+	sut := FieldGeneric(func(x StructForFieldMatcherTest) any {
 		return x.StringField1
 	}, gomock.Eq(expectedString))
 
