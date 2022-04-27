@@ -2,12 +2,10 @@ package typedmatchers
 
 import "github.com/golang/mock/gomock"
 
-func FieldEqual[T any, F any](fieldSelector func(x T) F, expectedValue F) fieldMatcher[T, any] {
-	return FieldGeneric(func(x T) any {
-		return fieldSelector(x)
-	}, gomock.Eq(expectedValue))
+func FieldEqual[T any, F any](fieldName string, expectedValue F) fieldMatcher[T, any] {
+	return FieldGeneric[T](fieldName, gomock.Eq(expectedValue))
 }
 
-func FieldInlineJSON[T any, J any](fieldName string, fieldSelector func(x T) string, function func(x J) bool) any {
-	return Field[T, string](fieldName, fieldSelector, InlineJSON(function))
+func FieldInlineJSON[T any, J any](fieldName string, function func(x J) bool) any {
+	return Field[T, string](fieldName, InlineJSON(function))
 }

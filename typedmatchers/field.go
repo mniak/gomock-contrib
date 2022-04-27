@@ -1,30 +1,46 @@
 package typedmatchers
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+
+	"github.com/mniak/gomock-contrib/internal/utils"
+)
 
 type fieldMatcher[T any, F any] struct {
 	fieldName string
-	selector  func(x T) F
 	matcher   Matcher[F]
 }
 
-func Field[T any, F any](fieldName string, fieldSelector func(x T) F, matcher Matcher[F]) fieldMatcher[T, F] {
+func Field[T any, F any](fieldName string, matcher Matcher[F]) fieldMatcher[T, F] {
 	return fieldMatcher[T, F]{
 		fieldName: fieldName,
-		selector:  fieldSelector,
 		matcher:   matcher,
 	}
 }
 
-func FieldGeneric[T any](fieldSelector func(x T) any, matcher Matcher[any]) fieldMatcher[T, any] {
+func FieldGeneric[T any](fieldName string, matcher Matcher[any]) fieldMatcher[T, any] {
 	return fieldMatcher[T, any]{
-		selector: fieldSelector,
-		matcher:  matcher,
+		fieldName: fieldName,
+		matcher:   matcher,
 	}
 }
 
+func (m fieldMatcher[T, F]) applySelector(x T) (F, bool) {
+	value := reflect.ValueOf(x)
+	if value.Kind() == reflect.Struct {
+		field := value.FieldByName(m.fieldName)
+		return utils.TryGetValue[F](field)
+	}
+	var f F
+	return f, false
+}
+
 func (m fieldMatcher[T, F]) Matches(x T) bool {
-	fieldValue := m.selector(x)
+	fieldValue, ok := m.applySelector(x)
+	if !ok {
+		return false
+	}
 	return m.matcher.Matches(fieldValue)
 }
 
@@ -33,6 +49,9 @@ func (m fieldMatcher[T, F]) String() string {
 }
 
 func (m fieldMatcher[T, F]) Got(actual T) string {
-	fieldValue := m.selector(actual)
+	fieldValue, ok := m.applySelector(actual)
+	if !ok {
+		return fmt.Sprintf("field %s could not be found", m.fieldName)
+	}
 	return fmt.Sprintf("field %s: %s", m.fieldName, formatGottenArg(m.matcher, fieldValue))
 }
