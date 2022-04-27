@@ -319,10 +319,22 @@ func Test_matchMaps(t *testing.T) {
 				name:  "uint64",
 				value: gofakeit.Uint64(),
 			},
-			// slices, maps, arrays
+			// maps, slice, array
 			{
 				name: "map",
-				value: []string{
+				value: map[any]any{
+					1: gofakeit.FarmAnimal(),
+				},
+			},
+			{
+				name: "slice",
+				value: []any{
+					gofakeit.FarmAnimal(),
+				},
+			},
+			{
+				name: "array",
+				value: [1]any{
 					gofakeit.FarmAnimal(),
 				},
 			},
