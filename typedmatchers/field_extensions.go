@@ -6,7 +6,7 @@ func FieldEqual[T any, F any](fieldName string, expectedValue F) fieldMatcher[T,
 	return FieldGeneric[T](fieldName, gomock.Eq(expectedValue))
 }
 
-func FieldJSON[T any, J any](fieldName string, expected map[string]any) Matcher[T] {
+func FieldJSON[T any](fieldName string, expected map[string]any) Matcher[T] {
 	return Field[T, string](fieldName, JSON(expected))
 }
 
