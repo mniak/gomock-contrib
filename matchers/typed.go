@@ -30,7 +30,7 @@ func Typed[T any](matchers ...typedmatchers.Matcher[T]) typedMatcher[T] {
 	}
 }
 
-func (m typedMatcher[T]) Matches(x interface{}) bool {
+func (m typedMatcher[T]) Matches(x any) bool {
 	switch val := x.(type) {
 	case T:
 		return m.typedMatcher.Matches(val)

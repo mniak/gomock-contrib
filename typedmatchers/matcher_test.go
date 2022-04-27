@@ -3,6 +3,6 @@ package typedmatchers
 import "github.com/golang/mock/gomock"
 
 var (
-	_ Matcher[interface{}] = gomock.Any()
-	_ Matcher[interface{}] = gomock.Eq(nil)
+	_ Matcher[any] = gomock.Any()
+	_ Matcher[any] = gomock.Eq(nil)
 )

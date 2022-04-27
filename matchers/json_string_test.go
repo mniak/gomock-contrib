@@ -2,6 +2,7 @@ package matchers
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -10,9 +11,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var _ gomock.Matcher = JSONObject(map[string]any{})
+var _ gomock.Matcher = JSONString("{}")
 
-type StructForTestsWithJSONObject struct {
+type StructForTestsWithJSONString struct {
 	FieldString string
 	FieldInt    int
 	FieldBool   bool
@@ -23,28 +24,21 @@ type StructForTestsWithJSONObject struct {
 	ExtraField string
 }
 
-func (s StructForTestsWithJSONObject) Clone() StructForTestsWithJSONObject {
+func (s StructForTestsWithJSONString) Clone() StructForTestsWithJSONString {
 	return s
 }
 
-func (s StructForTestsWithJSONObject) ToMap() map[string]any {
-	bytes, _ := json.Marshal(s)
-	var result map[string]any
-	json.Unmarshal(bytes, &result)
-	return result
-}
-
-func TestJSONObject(t *testing.T) {
+func TestJSON(t *testing.T) {
 	t.Run("When type is not string, should fail", func(t *testing.T) {
-		m := JSONObject(map[string]any{})
+		m := JSONString("{}")
 		assert.False(t, m.Matches(nil), "nil should fail")
 		assert.False(t, m.Matches(gofakeit.Bool()), "bool should fail")
 		assert.False(t, m.Matches(gofakeit.Int32()), "int32 should fail")
-		assert.False(t, m.Matches(StructForTestsWithJSONObject{}), "struct should fail")
+		assert.False(t, m.Matches(StructForTestsWithJSONString{}), "struct should fail")
 	})
 
 	t.Run("Basic tests", func(t *testing.T) {
-		m := JSONObject(map[string]any{})
+		m := JSONString("{}")
 		assert.True(t, m.Matches(`{}`), "empty JSON object should match")
 		assert.False(t, m.Matches(`{`), "Invalid JSON should cause failure")
 		assert.False(t, m.Matches(`abc123`), "String should cause failure")
@@ -54,17 +48,23 @@ func TestJSONObject(t *testing.T) {
 	})
 
 	t.Run("With field missing on expression, should match", func(t *testing.T) {
-		var sample StructForTestsWithJSONObject
+		var sample StructForTestsWithJSONString
 		gofakeit.Struct(&sample)
-		m := JSONObject(map[string]any{
-			// "FieldString": sample.FieldString,
-			// "FieldInt":    sample.FieldInt,
-			// "FieldBool":   sample.FieldBool,
-			"FieldStruct": map[string]any{
-				// "SubFieldString": sample.FieldStruct.SubFieldString,
-				"SubFieldInt": sample.FieldStruct.SubFieldInt,
-			},
-		})
+		m := JSONString(fmt.Sprintf(`{
+			"FieldString": "%s",
+			"FieldInt": %d,
+			"FieldBool": %t,
+			"FieldStruct": {
+				"SubFieldString": "%s",
+				"SubFieldInt": %d
+			}
+		}`,
+			sample.FieldString,
+			sample.FieldInt,
+			sample.FieldBool,
+			sample.FieldStruct.SubFieldString,
+			sample.FieldStruct.SubFieldInt,
+		))
 
 		jsonBytes, err := json.Marshal(sample)
 		require.NoError(t, err)
@@ -74,13 +74,13 @@ func TestJSONObject(t *testing.T) {
 	})
 
 	t.Run("With field on expression is not on JSON, should NOT match", func(t *testing.T) {
-		var sample StructForTestsWithJSONObject
+		var sample StructForTestsWithJSONString
 		gofakeit.Struct(&sample)
-		m := JSONObject(map[string]any{
-			"FieldString":     sample.FieldString,
-			"FieldInt":        sample.FieldInt,
-			"InexistentField": "this field does not exist",
-		})
+		m := JSONString(fmt.Sprintf(`{
+			"FieldString": "%s",
+			"FieldInt": %d,
+			"InexistentField": "this field does not exist"
+		}`, sample.FieldString, sample.FieldInt))
 
 		jsonBytes, err := json.Marshal(sample)
 		require.NoError(t, err)
@@ -90,15 +90,15 @@ func TestJSONObject(t *testing.T) {
 	})
 
 	t.Run("With subfield on expression is not on JSON, should NOT match", func(t *testing.T) {
-		var sample StructForTestsWithJSONObject
+		var sample StructForTestsWithJSONString
 		gofakeit.Struct(&sample)
-		m := JSONObject(map[string]any{
-			"FieldString": sample.FieldString,
-			"FieldInt":    sample.FieldInt,
-			"FieldStruct": map[string]any{
-				"InexistentSubfield": "this subfield does not exist",
+		m := JSONString(fmt.Sprintf(`{
+			"FieldString": "%s",
+			"FieldInt": %d,
+			"FieldStruct": {
+				"InexistentSubfield": "this subfield does not exist"
 			},
-		})
+		}`, sample.FieldString, sample.FieldInt))
 		jsonBytes, err := json.Marshal(sample)
 		require.NoError(t, err)
 
@@ -107,12 +107,15 @@ func TestJSONObject(t *testing.T) {
 	})
 
 	t.Run("When field has different value, should NOT match", func(t *testing.T) {
-		var sample StructForTestsWithJSONObject
+		var sample StructForTestsWithJSONString
 		gofakeit.Struct(&sample)
 		changedSample := sample.Clone()
 		changedSample.FieldString = gofakeit.SentenceSimple()
 
-		m := JSONObject(changedSample.ToMap())
+		changedSampleBytes, err := json.Marshal(changedSample)
+		require.NoError(t, err)
+
+		m := JSONString(string(changedSampleBytes))
 
 		sampleBytes, err := json.Marshal(sample)
 		require.NoError(t, err)
@@ -122,12 +125,15 @@ func TestJSONObject(t *testing.T) {
 	})
 
 	t.Run("When subfield has different value, should NOT match", func(t *testing.T) {
-		var sample StructForTestsWithJSONObject
+		var sample StructForTestsWithJSONString
 		gofakeit.Struct(&sample)
 		changedSample := sample.Clone()
 		changedSample.FieldStruct.SubFieldString = gofakeit.SentenceSimple()
 
-		m := JSONObject(changedSample.ToMap())
+		changedSampleBytes, err := json.Marshal(changedSample)
+		require.NoError(t, err)
+
+		m := JSONString(string(changedSampleBytes))
 
 		sampleBytes, err := json.Marshal(sample)
 		require.NoError(t, err)

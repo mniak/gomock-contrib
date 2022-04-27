@@ -1,4 +1,4 @@
-package matchers
+package utils
 
 import (
 	"fmt"
@@ -128,7 +128,7 @@ func Test_matchMaps(t *testing.T) {
 		}
 		for _, td := range testdata {
 			t.Run(td.name, func(t *testing.T) {
-				assert.False(t, matchMaps(td.expected, td.actual), "should not match")
+				assert.False(t, MatchMaps(td.expected, td.actual), "should not match")
 			})
 		}
 	})
@@ -195,7 +195,7 @@ func Test_matchMaps(t *testing.T) {
 						"key": type2.convert(number),
 					}
 
-					assert.True(t, matchMaps(map1, map2), "should match")
+					assert.True(t, MatchMaps(map1, map2), "should match")
 				})
 			}
 		}
@@ -239,7 +239,7 @@ func Test_matchMaps(t *testing.T) {
 					"field1": td.value,
 				}
 
-				assert.True(t, matchMaps(map1, map2), "should match")
+				assert.True(t, MatchMaps(map1, map2), "should match")
 			})
 		}
 	})
@@ -329,7 +329,7 @@ func Test_matchMaps(t *testing.T) {
 		}
 		for _, td := range testdata {
 			t.Run(td.name, func(t *testing.T) {
-				assert.True(t, matchMaps(td.expected, td.actual), "should match")
+				assert.True(t, MatchMaps(td.expected, td.actual), "should match")
 			})
 		}
 	})

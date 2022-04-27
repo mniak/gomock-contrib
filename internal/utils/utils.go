@@ -1,11 +1,11 @@
-package matchers
+package utils
 
 import (
 	"encoding/json"
 	"reflect"
 )
 
-func matchBytes(expected, data []byte) bool {
+func MatchBytes(expected, data []byte) bool {
 	var expectedmap map[string]any
 	err := json.Unmarshal(expected, &expectedmap)
 	if err != nil {
@@ -17,10 +17,10 @@ func matchBytes(expected, data []byte) bool {
 	if err != nil {
 		return false
 	}
-	return matchMaps(expectedmap, actualmap)
+	return MatchMaps(expectedmap, actualmap)
 }
 
-func matchMaps(expectedmap, actualMap map[string]any) bool {
+func MatchMaps(expectedmap, actualMap map[string]any) bool {
 	for key, expectedValue := range expectedmap {
 		actualValue, found := actualMap[key]
 		if !found {
@@ -28,7 +28,7 @@ func matchMaps(expectedmap, actualMap map[string]any) bool {
 		}
 		expectedReflectionValue := reflect.ValueOf(expectedValue)
 		actualReflectionValue := reflect.ValueOf(actualValue)
-		if !matchValues(expectedReflectionValue, actualReflectionValue) {
+		if !MatchValues(expectedReflectionValue, actualReflectionValue) {
 			return false
 		}
 	}
@@ -47,7 +47,7 @@ func asFloat(value reflect.Value) (float64, bool) {
 	return 0, false
 }
 
-func matchValues(expected, actual reflect.Value) bool {
+func MatchValues(expected, actual reflect.Value) bool {
 	for expected.Kind() == reflect.Pointer || expected.Kind() == reflect.Interface {
 		expected = expected.Elem()
 	}
@@ -69,7 +69,7 @@ func matchValues(expected, actual reflect.Value) bool {
 		for _, idx := range expected.MapKeys() {
 			expectedValue := expected.MapIndex(idx)
 			actualValue := actual.MapIndex(idx)
-			if !matchValues(expectedValue, actualValue) {
+			if !MatchValues(expectedValue, actualValue) {
 				return false
 			}
 		}
@@ -82,7 +82,7 @@ func matchValues(expected, actual reflect.Value) bool {
 		for idx := 0; idx < actual.Len(); idx++ {
 			expectedValue := expected.Index(idx)
 			actualValue := actual.Index(idx)
-			if !matchValues(expectedValue, actualValue) {
+			if !MatchValues(expectedValue, actualValue) {
 				return false
 			}
 		}
