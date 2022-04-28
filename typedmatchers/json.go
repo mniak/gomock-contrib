@@ -52,5 +52,5 @@ func (m jsonMatcher[T]) Got(actual T) string {
 	if err != nil {
 		return fmt.Sprintf("%+v (%T)", actual, actual)
 	}
-	return fmt.Sprintf("shoud be JSON matching %s", pretty)
+	return string(pretty)
 }
