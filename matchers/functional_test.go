@@ -29,18 +29,7 @@ func TestFunctionalTests(t *testing.T) {
 
 		sample := SampleType{
 			Message: utils.ToPointer(`{
-				"event_id": "event-id",
-				"domain": "migration",
-				"event_type": "account_outgoing",
-				"schema_version": 1,
-				"org_id": "TN-34125ec5-d288-4601-8073-f60ee429088c",
-				"timestamp": "2022-04-29T14:50:41.342-03:00",
-				"cid": "",
 				"data": {
-					"operation": "INSERT",
-					"status": "SUCCESS",
-					"code": "MIGR-0001",
-					"message": "The token was migrated with success",
 					"migration": {
 						"id": "",
 						"card_migration_id": "",
