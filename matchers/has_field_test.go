@@ -5,6 +5,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
+	"github.com/mniak/gomock-contrib/internal/testing/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -91,6 +92,79 @@ func TestHasField_ThatMatches(t *testing.T) {
 				assert.False(t, td.sut.Matches(withWrongKey), "wrong key should not match")
 				assert.False(t, td.sut.Matches(withWrongValue), "wrong value should not match")
 			})
+		})
+	}
+}
+
+func TestHasField_ThatMatches_WantMessage(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	testdata := []struct {
+		name         string
+		sut          hasFieldThatMatchesMatcher
+		sampleValue  any
+		expectedGot  string
+		expectedWant string
+	}{
+		{
+			name:         "Using value directly as matcher",
+			sut:          HasField("MyField").ThatMatches("field_value"),
+			sampleValue:  "wrong_value",
+			expectedGot:  ".MyField is wrong_value (string)",
+			expectedWant: ".MyField is equal to field_value (string)",
+		},
+		{
+			name:         "Using submatcher",
+			sut:          HasField("MyField").ThatMatches(gomock.Eq("field_value")),
+			sampleValue:  "wrong_value",
+			expectedGot:  ".MyField is wrong_value (string)",
+			expectedWant: ".MyField is equal to field_value (string)",
+		},
+		{
+			name:         "Using value directly as matcher",
+			sut:          HasField("MyField").ThatMatches("field_value"),
+			sampleValue:  123,
+			expectedGot:  ".MyField is 123 (int)",
+			expectedWant: ".MyField is equal to field_value (string)",
+		},
+		{
+			name: "Using submatcher",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcher(ctrl)
+				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
+				return HasField("MyField").ThatMatches(mock)
+			}(),
+			sampleValue:  123,
+			expectedGot:  ".MyField is 123 (int)",
+			expectedWant: ".MyField <submatcher.String()>",
+		},
+		{
+			name: "Using submatcher",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcher(ctrl)
+				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
+				return HasField("MyField").ThatMatches(mock)
+			}(),
+			sampleValue:  "wrong_value",
+			expectedGot:  ".MyField is wrong_value (string)",
+			expectedWant: ".MyField <submatcher.String()>",
+		},
+		{
+			name:         "Using submatcher",
+			sut:          HasField("MyField").ThatMatches(gomock.Eq("field_value")),
+			sampleValue:  123,
+			expectedGot:  ".MyField is 123 (int)",
+			expectedWant: ".MyField is equal to field_value (string)",
+		},
+	}
+	for _, td := range testdata {
+		t.Run(td.name, func(t *testing.T) {
+			wantMessage := td.sut.String()
+			gotMessage := td.sut.Got(td.sampleValue)
+
+			assert.Equal(t, td.expectedWant, wantMessage)
+			assert.Equal(t, td.expectedGot, gotMessage)
 		})
 	}
 }
