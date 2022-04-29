@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mniak/gomock-contrib/internal/utils"
 )
 
 type hasFieldMatcher struct {
@@ -47,16 +48,10 @@ func (m hasFieldMatcher) String() string {
 	return fmt.Sprintf("has field %s", m.fieldName)
 }
 
-func (m hasFieldMatcher) ThatMatches(arg any) hasFieldThatMatchesMatcher {
-	var submatcher gomock.Matcher
-	if sub, is := arg.(gomock.Matcher); is {
-		submatcher = sub
-	} else {
-		submatcher = gomock.Eq(arg)
-	}
+func (m hasFieldMatcher) ThatMatches(matcher any) hasFieldThatMatchesMatcher {
 	return hasFieldThatMatchesMatcher{
 		parent:     m,
-		submatcher: submatcher,
+		submatcher: utils.ArgAsMatcher(matcher),
 	}
 }
 

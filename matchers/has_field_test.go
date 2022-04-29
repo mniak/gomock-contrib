@@ -96,7 +96,7 @@ func TestHasField_ThatMatches(t *testing.T) {
 	}
 }
 
-func TestHasField_ThatMatches_WantMessage(t *testing.T) {
+func TestHasField_ThatMatches_Messages(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
