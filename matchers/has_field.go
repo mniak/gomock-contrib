@@ -28,11 +28,17 @@ func (m hasFieldMatcher) internalMatches(arg any) (any, bool) {
 	switch value.Kind() {
 	case reflect.Struct:
 		structField := value.FieldByName(m.fieldName)
-		return structField.Interface(), structField.Kind() != reflect.Invalid
+		if structField.Kind() == reflect.Invalid {
+			return nil, false
+		}
+		return structField.Interface(), true
 
 	case reflect.Map:
 		mapValue := value.MapIndex(reflect.ValueOf(m.fieldName))
-		return mapValue.Interface(), mapValue.Kind() != reflect.Invalid
+		if mapValue.Kind() == reflect.Invalid {
+			return nil, false
+		}
+		return mapValue.Interface(), true
 	}
 	return nil, false
 }
