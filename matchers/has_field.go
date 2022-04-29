@@ -86,5 +86,5 @@ func (m hasFieldThatMatchesMatcher) Got(arg any) string {
 		subgot := gf.Got(field)
 		return fmt.Sprintf("field %s %s", m.parent.fieldName, subgot)
 	}
-	return fmt.Sprintf("field .%s is %v (%T)", m.parent.fieldName, field, field)
+	return fmt.Sprintf("field %s is %v (%T)", m.parent.fieldName, field, field)
 }
