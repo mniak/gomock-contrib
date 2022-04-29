@@ -65,11 +65,12 @@ func (m isJSONThatMatchesMatcher) String() string {
 }
 
 func (m isJSONThatMatchesMatcher) Got(arg any) string {
-	if !m.parent.Matches(arg) {
+	value, is := utils.MatchJSON[any](arg)
+	if !is {
 		return m.parent.Got(arg)
 	}
 	if gf, is := m.submatcher.(gomock.GotFormatter); is {
-		return gf.Got(arg)
+		return gf.Got(value)
 	}
 	return fmt.Sprintf("is %v (%T)", arg, arg)
 }

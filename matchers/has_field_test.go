@@ -141,7 +141,7 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 		{
 			name: "Using mocked submatcher (string)",
 			sut: func() hasFieldThatMatchesMatcher {
-				mock := mocks.NewMockMatcher(ctrl)
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
 				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
 				return HasField("MyField").ThatMatches(mock)
 			}(),
@@ -152,7 +152,7 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 		{
 			name: "Using mocked submatcher (int)",
 			sut: func() hasFieldThatMatchesMatcher {
-				mock := mocks.NewMockMatcher(ctrl)
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
 				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
 				return HasField("MyField").ThatMatches(mock)
 			}(),
@@ -164,7 +164,7 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 		{
 			name: "Using mocked submatcher that is GotFormatter",
 			sut: func() hasFieldThatMatchesMatcher {
-				mock := mocks.NewMockGoMockMatcherAndGotFormatter(ctrl)
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
 				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
 				mock.EXPECT().Got(gomock.Any()).Return("<submatcher.Got(...)>").AnyTimes()
 				return HasField("MyField").ThatMatches(mock)

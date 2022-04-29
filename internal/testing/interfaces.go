@@ -2,7 +2,7 @@ package testing
 
 import "github.com/golang/mock/gomock"
 
-type GoMockMatcherAndGotFormatter interface {
+type MatcherGotFormatter interface {
 	gomock.Matcher
 	gomock.GotFormatter
 }

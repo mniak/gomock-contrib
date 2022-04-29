@@ -172,8 +172,8 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 		{
 			name: "Invalid type (int)",
 			sut: func() isJSONThatMatchesMatcher {
-				mock := mocks.NewMockMatcher(ctrl)
-				mock.EXPECT().String().Return("<wrong_int>").AnyTimes()
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<wrong_int>")
 				return IsJSON().ThatMatches(mock)
 			}(),
 			sampleValue:  123,
@@ -183,8 +183,8 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 		{
 			name: "Invalid type (boolean)",
 			sut: func() isJSONThatMatchesMatcher {
-				mock := mocks.NewMockMatcher(ctrl)
-				mock.EXPECT().String().Return("<wrong_bool>").AnyTimes()
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<wrong_bool>")
 				return IsJSON().ThatMatches(mock)
 			}(),
 			sampleValue:  false,
@@ -194,31 +194,33 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 		{
 			name: "Ill-formatted json",
 			sut: func() isJSONThatMatchesMatcher {
-				mock := mocks.NewMockMatcher(ctrl)
-				mock.EXPECT().String().Return("<ill_test>").AnyTimes()
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<ill_test>")
 				return IsJSON().ThatMatches(mock)
 			}(),
 			sampleValue:  `{ "key": "value"`,
 			expectedGot:  `is { "key": "value" (string)`,
 			expectedWant: "is a valid JSON that <ill_test>",
 		},
-		// {
-		// 	name: "Using mocked submatcher (int)",
-		// 	sut: func() isJSONThatMatchesMatcher {
-		// 		mock := mocks.NewMockMatcher(ctrl)
-		// 		mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
-		// 		return IsJSON().ThatMatches(mock)
-		// 	}(),
-		// 	sampleValue:  123,
-		// 	expectedGot:  "is 123 (int)",
-		// 	expectedWant: "is a valid JSON that <submatcher.String()>",
-		// },
-		// // Mocked submatcher that implements GotMatcher
+		{
+			name: "JSON not matching",
+			sut: func() isJSONThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<want_json_not_matching>")
+				mock.EXPECT().Got(map[string]any{
+					"key": "value",
+				}).Return("<got_json_not_matching>")
+				return IsJSON().ThatMatches(mock)
+			}(),
+			sampleValue:  `{"key": "value"}`,
+			expectedGot:  "<got_json_not_matching>",
+			expectedWant: "is a valid JSON that <want_json_not_matching>",
+		},
 		// {
 		// 	name: "Using mocked submatcher that is GotFormatter",
 		// 	sut: func() isJSONThatMatchesMatcher {
-		// 		mock := mocks.NewMockGoMockMatcherAndGotFormatter(ctrl)
-		// 		mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
+		// 		mock := mocks.NewMockMatcherGotFormatter(ctrl)
+		// 		mock.EXPECT().String().Return("<submatcher.String()>")
 		// 		return IsJSON().ThatMatches(mock)
 		// 	}(),
 		// 	sampleValue:  "non-json",
@@ -228,11 +230,11 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 		// {
 		// 	name: "Using mocked submatcher that is GotFormatter",
 		// 	sut: func() isJSONThatMatchesMatcher {
-		// 		mock := mocks.NewMockGoMockMatcherAndGotFormatter(ctrl)
-		// 		mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
+		// 		mock := mocks.NewMockMatcherGotFormatter(ctrl)
+		// 		mock.EXPECT().String().Return("<submatcher.String()>")
 		// 		mock.EXPECT().Got(map[string]any{
 		// 			"key1": "value1",
-		// 		}).Return("<submatcher.Got(...)>").AnyTimes()
+		// 		}).Return("<submatcher.Got(...)>")
 		// 		return IsJSON().ThatMatches(mock)
 		// 	}(),
 		// 	sampleValue:  `{"key": "value"}`,
