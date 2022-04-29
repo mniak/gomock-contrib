@@ -6,6 +6,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
 	"github.com/mniak/gomock-contrib/internal/testing/mocks"
+	"github.com/mniak/gomock-contrib/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -162,6 +163,18 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 			expectedWant: "has field ArrayField that <msg_want_struct>",
 		},
 		{
+			name: "struct with pointer value",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<msg_want_struct>")
+				mock.EXPECT().Got("the_value").Return("<msg_got_struct>")
+				return HasField("ArrayField").ThatMatches(mock)
+			}(),
+			sampleValue:  struct{ ArrayField *string }{ArrayField: utils.ToPointer("the_value")},
+			expectedGot:  "field ArrayField <msg_got_struct>",
+			expectedWant: "has field ArrayField that <msg_want_struct>",
+		},
+		{
 			name: "map[string]string",
 			sut: func() hasFieldThatMatchesMatcher {
 				mock := mocks.NewMockMatcherGotFormatter(ctrl)
@@ -170,6 +183,18 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 				return HasField("KeyOfTheMap").ThatMatches(mock)
 			}(),
 			sampleValue:  map[string]string{"KeyOfTheMap": "the_value_of_the_field"},
+			expectedGot:  "field KeyOfTheMap <msg_got_map[string]string>",
+			expectedWant: "has field KeyOfTheMap that <msg_want_map[string]string>",
+		},
+		{
+			name: "map[string]string with pointer value",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<msg_want_map[string]string>")
+				mock.EXPECT().Got("the_value_of_the_field").Return("<msg_got_map[string]string>")
+				return HasField("KeyOfTheMap").ThatMatches(mock)
+			}(),
+			sampleValue:  map[string]*string{"KeyOfTheMap": utils.ToPointer("the_value_of_the_field")},
 			expectedGot:  "field KeyOfTheMap <msg_got_map[string]string>",
 			expectedWant: "has field KeyOfTheMap that <msg_want_map[string]string>",
 		},
@@ -194,6 +219,18 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 				return HasField("KeyOfTheMap").ThatMatches(mock)
 			}(),
 			sampleValue:  map[string]any{"KeyOfTheMap": 123456789},
+			expectedGot:  "field KeyOfTheMap <msg_got_map[string]any>",
+			expectedWant: "has field KeyOfTheMap that <msg_want_map[string]any>",
+		},
+		{
+			name: "map[string]any with pointer value",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<msg_want_map[string]any>")
+				mock.EXPECT().Got(123456789).Return("<msg_got_map[string]any>")
+				return HasField("KeyOfTheMap").ThatMatches(mock)
+			}(),
+			sampleValue:  map[string]any{"KeyOfTheMap": utils.ToPointer(123456789)},
 			expectedGot:  "field KeyOfTheMap <msg_got_map[string]any>",
 			expectedWant: "has field KeyOfTheMap that <msg_want_map[string]any>",
 		},
