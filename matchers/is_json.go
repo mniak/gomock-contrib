@@ -28,9 +28,9 @@ func (m isJSONMatcher) Matches(arg any) bool {
 func (m isJSONMatcher) Got(arg any) string {
 	switch actual := arg.(type) {
 	case string:
-		return fmt.Sprintf("is %v (%T)", actual, actual)
+		return fmt.Sprintf("is %v (string)", actual)
 	case []byte:
-		return fmt.Sprintf("is %v (%T)", string(actual), actual)
+		return fmt.Sprintf("is %v ([]byte)", string(actual))
 	default:
 		return fmt.Sprintf("data with invalid type: %v (%T)", arg, arg)
 	}

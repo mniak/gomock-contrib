@@ -50,9 +50,9 @@ func TestIsJSON(t *testing.T) {
 
 				assert.Equal(t, "is valid JSON", sut.String())
 				assert.False(t, sut.Matches(td.invalidData), "should not match string")
-				assert.Equal(t, td.invalidData, sut.Got(td.invalidData))
+				assert.Equal(t, "is "+td.invalidData+" (string)", sut.Got(td.invalidData))
 				assert.False(t, sut.Matches([]byte(td.invalidData)), "should not match bytes")
-				assert.Equal(t, td.invalidData, sut.Got([]byte(td.invalidData)))
+				assert.Equal(t, "is "+td.invalidData+" ([]byte)", sut.Got([]byte(td.invalidData)))
 			})
 		}
 	})
