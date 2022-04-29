@@ -42,9 +42,24 @@ func internalPrettyPrintType(rtype reflect.Type) string {
 	}
 }
 
+func valueIsNillable(value reflect.Value) bool {
+	k := value.Kind()
+	switch k {
+	case reflect.Chan:
+	case reflect.Func:
+	case reflect.Map:
+	case reflect.Pointer, reflect.UnsafePointer:
+	case reflect.Interface:
+	case reflect.Slice:
+	default:
+		return false
+	}
+	return true
+}
+
 func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
-	for value.Kind() == reflect.Interface {
-		value = value.Elem()
+	if valueIsNillable(value) && value.IsNil() {
+		return "nil"
 	}
 	kind := value.Kind()
 	switch kind {
@@ -94,7 +109,7 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 		}
 		return fmt.Sprintf("[]%s{\n%s%s}", sliceTypeStr, newlinePrefix, strings.Join(lines, ""))
 	case reflect.String:
-		return fmt.Sprintf("%v", strconv.Quote(value.String()))
+		return strconv.Quote(value.String())
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return strconv.Itoa(int(value.Int()))
@@ -102,8 +117,8 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 	// 	fallthrough
 	// case reflect.Float32, reflect.Float64:
 	// 	fallthrough
-	// case reflect.Bool:
-	// 	sb.WriteString(fmt.Sprintf("%s%v", linePrefix, value.Interface()))
+	case reflect.Bool:
+		return strconv.FormatBool(value.Bool())
 	// case reflect.UnsafePointer:
 	// case reflect.Struct:
 	// case reflect.Complex64:
@@ -111,9 +126,13 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 	// case reflect.Array:
 	// case reflect.Chan:
 	// case reflect.Func:
-	// case reflect.Interface:
-	// case reflect.Pointer:
+	case reflect.Interface:
+		return internalPrettyPrint(value.Elem(), newlinePrefix)
+	case reflect.Pointer:
+		elemPretty := internalPrettyPrint(value.Elem(), newlinePrefix)
+		return fmt.Sprintf("&%s", elemPretty)
 	default:
-		return fmt.Sprintf("(could not format %T)", value.Interface())
+		v := value.Interface()
+		return fmt.Sprintf("%v (%T)", v, v)
 	}
 }
