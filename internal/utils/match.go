@@ -90,3 +90,22 @@ func MatchValues(expected, actual reflect.Value) bool {
 	}
 	return actual.Interface() == expected.Interface()
 }
+
+func MatchJSON[T any](arg any) (T, bool) {
+	var result T
+	switch actual := arg.(type) {
+	case string:
+		err := json.Unmarshal([]byte(actual), &result)
+		if err != nil {
+			return result, false
+		}
+	case []byte:
+		err := json.Unmarshal(actual, &result)
+		if err != nil {
+			return result, false
+		}
+	default:
+		return result, false
+	}
+	return result, true
+}
