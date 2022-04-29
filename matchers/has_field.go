@@ -18,7 +18,7 @@ func HasField(name string) hasFieldMatcher {
 	}
 }
 
-func (m hasFieldMatcher) internalMatches(arg any) (reflect.Value, bool) {
+func (m hasFieldMatcher) internalMatches(arg any) (any, bool) {
 	value := reflect.ValueOf(arg)
 
 	for value.Kind() == reflect.Interface || value.Kind() == reflect.Pointer {
@@ -28,15 +28,13 @@ func (m hasFieldMatcher) internalMatches(arg any) (reflect.Value, bool) {
 	switch value.Kind() {
 	case reflect.Struct:
 		structField := value.FieldByName(m.fieldName)
-		skind := structField.Kind()
-		_ = skind
-		return structField, structField.Kind() != reflect.Invalid
+		return structField.Interface(), structField.Kind() != reflect.Invalid
 
 	case reflect.Map:
 		mapValue := value.MapIndex(reflect.ValueOf(m.fieldName))
-		return mapValue, mapValue.Kind() != reflect.Invalid
+		return mapValue.Interface(), mapValue.Kind() != reflect.Invalid
 	}
-	return reflect.Value{}, false
+	return nil, false
 }
 
 func (m hasFieldMatcher) Matches(arg any) bool {
@@ -62,26 +60,25 @@ type hasFieldThatMatchesMatcher struct {
 
 func (m hasFieldThatMatchesMatcher) Matches(arg any) bool {
 	value, found := m.parent.internalMatches(arg)
-	if !found || !value.CanInterface() {
+	if !found {
 		return false
 	}
-	val := value.Interface()
-	return m.submatcher.Matches(val)
+	return m.submatcher.Matches(value)
 }
 
 func (m hasFieldThatMatchesMatcher) String() string {
-	return fmt.Sprintf(".%s %s", m.parent.fieldName, m.submatcher.String())
+	return fmt.Sprintf("has field %s that %s", m.parent.fieldName, m.submatcher.String())
 }
 
 func (m hasFieldThatMatchesMatcher) Got(arg any) string {
-	_, found := m.parent.internalMatches(arg)
+	field, found := m.parent.internalMatches(arg)
 	if !found {
 		return fmt.Sprintf("data without field %s: %v (%T)", m.parent.fieldName, arg, arg)
 	}
 
 	if gf, is := m.submatcher.(gomock.GotFormatter); is {
-		subgot := gf.Got(arg)
-		return fmt.Sprintf(".%s %s", m.parent.fieldName, subgot)
+		subgot := gf.Got(field)
+		return fmt.Sprintf("field %s %s", m.parent.fieldName, subgot)
 	}
-	return fmt.Sprintf(".%s is %v (%T)", m.parent.fieldName, arg, arg)
+	return fmt.Sprintf("field .%s is %v (%T)", m.parent.fieldName, field, field)
 }

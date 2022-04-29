@@ -113,14 +113,14 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 			sut:          HasField("MyField").ThatMatches("field_value"),
 			sampleValue:  "wrong_value",
 			expectedGot:  "data without field MyField: wrong_value (string)",
-			expectedWant: ".MyField is equal to field_value (string)",
+			expectedWant: "has field MyField that is equal to field_value (string)",
 		},
 		{
 			name:         "Can't find field, with submatcher (string)",
 			sut:          HasField("MyField").ThatMatches(gomock.Eq("field_value")),
 			sampleValue:  "wrong_value",
 			expectedGot:  "data without field MyField: wrong_value (string)",
-			expectedWant: ".MyField is equal to field_value (string)",
+			expectedWant: "has field MyField that is equal to field_value (string)",
 		},
 		// Int
 		{
@@ -128,18 +128,18 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 			sut:          HasField("MyField").ThatMatches("field_value"),
 			sampleValue:  123,
 			expectedGot:  "data without field MyField: 123 (int)",
-			expectedWant: ".MyField is equal to field_value (string)",
+			expectedWant: "has field MyField that is equal to field_value (string)",
 		},
 		{
 			name:         "Can't find field, with submatcher (int)",
 			sut:          HasField("MyField").ThatMatches(gomock.Eq("field_value")),
 			sampleValue:  123,
 			expectedGot:  "data without field MyField: 123 (int)",
-			expectedWant: ".MyField is equal to field_value (string)",
+			expectedWant: "has field MyField that is equal to field_value (string)",
 		},
 		// Mocked submatcher
 		{
-			name: "Can't find field, with mocked submatcher (string)",
+			name: "Can't find field, with mocked submatcher",
 			sut: func() hasFieldThatMatchesMatcher {
 				mock := mocks.NewMockMatcherGotFormatter(ctrl)
 				mock.EXPECT().String().Return("<submatcher.String()>")
@@ -147,7 +147,19 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 			}(),
 			sampleValue:  "wrong_value",
 			expectedGot:  "data without field MyField: wrong_value (string)",
-			expectedWant: ".MyField <submatcher.String()>",
+			expectedWant: "has field MyField that <submatcher.String()>",
+		},
+		{
+			name: "Struct",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<want_struct_field>")
+				mock.EXPECT().Got("struct_myfield_value").Return("<got_struct_field>")
+				return HasField("MyField").ThatMatches(mock)
+			}(),
+			sampleValue:  struct{ MyField string }{MyField: "struct_myfield_value"},
+			expectedGot:  "field MyField <got_struct_field>",
+			expectedWant: "has field MyField that <want_struct_field>",
 		},
 		// {
 		// 	name: "Using mocked submatcher (int)",
