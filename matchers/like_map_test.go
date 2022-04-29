@@ -355,7 +355,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 		{
 			name:            "empty map",
 			expectedMap:     map[string]any{},
-			expectedMessage: "should match map[string]any{}",
+			expectedMessage: "matches map[string]any{}",
 		},
 		{
 			name: "basic map with 2 fields",
@@ -363,7 +363,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 				"field1": "value1",
 				"field2": 2,
 			},
-			expectedMessage: `should match map[string]any{
+			expectedMessage: `matches map[string]any{
 	"field1": "value1",
 	"field2": 2,
 }`,
@@ -376,7 +376,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 					"field2": 2,
 				},
 			},
-			expectedMessage: `should match map[string]any{
+			expectedMessage: `matches map[string]any{
 	"submap": map[string]any{
 		"field1": "value1",
 		"field2": 2,
@@ -391,7 +391,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 					"slice item 2",
 				},
 			},
-			expectedMessage: `should match map[string]any{
+			expectedMessage: `matches map[string]any{
 	"slice": []string{
 		"slice item 1",
 		"slice item 2",
