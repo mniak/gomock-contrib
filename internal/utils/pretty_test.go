@@ -86,6 +86,27 @@ func TestPrettyPrintMap(t *testing.T) {
 	},
 }`,
 		},
+		{
+			name: "Struct field",
+			sample: map[string]any{
+				"Struct": struct {
+					String  string
+					Integer int
+				}{
+					String:  "string value",
+					Integer: 1234,
+				},
+			},
+			expected: `map[string]any{
+	"Struct": struct {
+		Integer int
+		String string
+	}{
+		Integer: 1234,
+		String: "string value",
+	},
+}`,
+		},
 	}
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
