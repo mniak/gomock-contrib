@@ -150,41 +150,53 @@ func TestHasField_ThatMatches_Messages(t *testing.T) {
 			expectedWant: "has field MyField that <submatcher.String()>",
 		},
 		{
-			name: "Struct",
+			name: "struct",
 			sut: func() hasFieldThatMatchesMatcher {
 				mock := mocks.NewMockMatcherGotFormatter(ctrl)
-				mock.EXPECT().String().Return("<want_struct_field>")
-				mock.EXPECT().Got("struct_myfield_value").Return("<got_struct_field>")
-				return HasField("MyField").ThatMatches(mock)
+				mock.EXPECT().String().Return("<msg_want_struct>")
+				mock.EXPECT().Got("the_value").Return("<msg_got_struct>")
+				return HasField("ArrayField").ThatMatches(mock)
 			}(),
-			sampleValue:  struct{ MyField string }{MyField: "struct_myfield_value"},
-			expectedGot:  "field MyField <got_struct_field>",
-			expectedWant: "has field MyField that <want_struct_field>",
+			sampleValue:  struct{ ArrayField string }{ArrayField: "the_value"},
+			expectedGot:  "field ArrayField <msg_got_struct>",
+			expectedWant: "has field ArrayField that <msg_want_struct>",
 		},
-		// {
-		// 	name: "Using mocked submatcher (int)",
-		// 	sut: func() hasFieldThatMatchesMatcher {
-		// 		mock := mocks.NewMockMatcherGotFormatter(ctrl)
-		// 		mock.EXPECT().String().Return("<submatcher.String()>")
-		// 		return HasField("MyField").ThatMatches(mock)
-		// 	}(),
-		// 	sampleValue:  123,
-		// 	expectedGot:  ".MyField is 123 (int)",
-		// 	expectedWant: ".MyField <submatcher.String()>",
-		// },
-		// // Mocked submatcher that implements GotMatcher
-		// {
-		// 	name: "Using mocked submatcher that is GotFormatter",
-		// 	sut: func() hasFieldThatMatchesMatcher {
-		// 		mock := mocks.NewMockMatcherGotFormatter(ctrl)
-		// 		mock.EXPECT().String().Return("<submatcher.String()>")
-		// 		mock.EXPECT().Got(gomock.Any()).Return("<submatcher.Got(...)>")
-		// 		return HasField("MyField").ThatMatches(mock)
-		// 	}(),
-		// 	sampleValue:  gofakeit.SentenceSimple(),
-		// 	expectedGot:  ".MyField <submatcher.Got(...)>",
-		// 	expectedWant: ".MyField <submatcher.String()>",
-		// },
+		{
+			name: "map[string]string",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<msg_want_map[string]string>")
+				mock.EXPECT().Got("the_value_of_the_field").Return("<msg_got_map[string]string>")
+				return HasField("KeyOfTheMap").ThatMatches(mock)
+			}(),
+			sampleValue:  map[string]string{"KeyOfTheMap": "the_value_of_the_field"},
+			expectedGot:  "field KeyOfTheMap <msg_got_map[string]string>",
+			expectedWant: "has field KeyOfTheMap that <msg_want_map[string]string>",
+		},
+		{
+			name: "map[string]int",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<msg_want_map[string]int>")
+				mock.EXPECT().Got(999123).Return("<msg_got_map[string]int>")
+				return HasField("KeyOfTheMap").ThatMatches(mock)
+			}(),
+			sampleValue:  map[string]int{"KeyOfTheMap": 999123},
+			expectedGot:  "field KeyOfTheMap <msg_got_map[string]int>",
+			expectedWant: "has field KeyOfTheMap that <msg_want_map[string]int>",
+		},
+		{
+			name: "map[string]any",
+			sut: func() hasFieldThatMatchesMatcher {
+				mock := mocks.NewMockMatcherGotFormatter(ctrl)
+				mock.EXPECT().String().Return("<msg_want_map[string]any>")
+				mock.EXPECT().Got(123456789).Return("<msg_got_map[string]any>")
+				return HasField("KeyOfTheMap").ThatMatches(mock)
+			}(),
+			sampleValue:  map[string]any{"KeyOfTheMap": 123456789},
+			expectedGot:  "field KeyOfTheMap <msg_got_map[string]any>",
+			expectedWant: "has field KeyOfTheMap that <msg_want_map[string]any>",
+		},
 	}
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
