@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mniak/gomock-contrib/internal/utils"
 )
 
 type hasFieldMatcher struct {
@@ -17,25 +18,25 @@ func HasField(name string) hasFieldMatcher {
 	}
 }
 
-func (m hasFieldMatcher) internalMatches(arg any) (reflect.Value, bool) {
-	value := reflect.ValueOf(arg)
-
-	for value.Kind() == reflect.Interface || value.Kind() == reflect.Pointer {
-		value = value.Elem()
-	}
+func (m hasFieldMatcher) internalMatches(arg any) (any, bool) {
+	value := utils.UnwrapValue(reflect.ValueOf(arg))
 
 	switch value.Kind() {
 	case reflect.Struct:
 		structField := value.FieldByName(m.fieldName)
-		skind := structField.Kind()
-		_ = skind
-		return structField, structField.Kind() != reflect.Invalid
+		if structField.Kind() == reflect.Invalid {
+			return nil, false
+		}
+		return utils.UnwrapValue(structField).Interface(), true
 
 	case reflect.Map:
 		mapValue := value.MapIndex(reflect.ValueOf(m.fieldName))
-		return mapValue, mapValue.Kind() != reflect.Invalid
+		if mapValue.Kind() == reflect.Invalid {
+			return nil, false
+		}
+		return utils.UnwrapValue(mapValue).Interface(), true
 	}
-	return reflect.Value{}, false
+	return nil, false
 }
 
 func (m hasFieldMatcher) Matches(arg any) bool {
@@ -47,33 +48,39 @@ func (m hasFieldMatcher) String() string {
 	return fmt.Sprintf("has field %s", m.fieldName)
 }
 
-func (m hasFieldMatcher) ThatMatches(arg any) hasFieldThatMatchMatcher {
-	var submatcher gomock.Matcher
-	if sub, is := arg.(gomock.Matcher); is {
-		submatcher = sub
-	} else {
-		submatcher = gomock.Eq(arg)
-	}
-	return hasFieldThatMatchMatcher{
+func (m hasFieldMatcher) ThatMatches(matcher any) hasFieldThatMatchesMatcher {
+	return hasFieldThatMatchesMatcher{
 		parent:     m,
-		submatcher: submatcher,
+		submatcher: utils.ArgAsMatcher(matcher),
 	}
 }
 
-type hasFieldThatMatchMatcher struct {
+type hasFieldThatMatchesMatcher struct {
 	parent     hasFieldMatcher
 	submatcher gomock.Matcher
 }
 
-func (m hasFieldThatMatchMatcher) Matches(arg any) bool {
+func (m hasFieldThatMatchesMatcher) Matches(arg any) bool {
 	value, found := m.parent.internalMatches(arg)
-	if !found || !value.CanInterface() {
+	if !found {
 		return false
 	}
-	val := value.Interface()
-	return m.submatcher.Matches(val)
+	return m.submatcher.Matches(value)
 }
 
-func (m hasFieldThatMatchMatcher) String() string {
-	return ""
+func (m hasFieldThatMatchesMatcher) String() string {
+	return fmt.Sprintf("has field %s that %s", m.parent.fieldName, m.submatcher.String())
+}
+
+func (m hasFieldThatMatchesMatcher) Got(arg any) string {
+	field, found := m.parent.internalMatches(arg)
+	if !found {
+		return fmt.Sprintf("data without field %s: %v (%T)", m.parent.fieldName, arg, arg)
+	}
+
+	if gf, is := m.submatcher.(gomock.GotFormatter); is {
+		subgot := gf.Got(field)
+		return fmt.Sprintf("field %s %s", m.parent.fieldName, subgot)
+	}
+	return fmt.Sprintf("field %s is %v (%T)", m.parent.fieldName, field, field)
 }

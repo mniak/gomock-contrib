@@ -2,6 +2,7 @@ package matchers
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/golang/mock/gomock"
 	"github.com/mniak/gomock-contrib/internal/utils"
@@ -24,8 +25,19 @@ func (m isJSONMatcher) Matches(arg any) bool {
 	}
 }
 
+func (m isJSONMatcher) Got(arg any) string {
+	switch actual := arg.(type) {
+	case string:
+		return fmt.Sprintf("is %v (string)", actual)
+	case []byte:
+		return fmt.Sprintf("is %v ([]byte)", string(actual))
+	default:
+		return fmt.Sprintf("data with invalid type: %v (%T)", arg, arg)
+	}
+}
+
 func (m isJSONMatcher) String() string {
-	return ""
+	return "is valid JSON"
 }
 
 func (m isJSONMatcher) ThatMatches(matcher gomock.Matcher) isJSONThatMatchesMatcher {
@@ -49,5 +61,16 @@ func (m isJSONThatMatchesMatcher) Matches(arg any) bool {
 }
 
 func (m isJSONThatMatchesMatcher) String() string {
-	return ""
+	return fmt.Sprintf("is a valid JSON that %s", m.submatcher.String())
+}
+
+func (m isJSONThatMatchesMatcher) Got(arg any) string {
+	value, is := utils.MatchJSON[any](arg)
+	if !is {
+		return m.parent.Got(arg)
+	}
+	if gf, is := m.submatcher.(gomock.GotFormatter); is {
+		return gf.Got(value)
+	}
+	return fmt.Sprintf("is %v (%T)", arg, arg)
 }
