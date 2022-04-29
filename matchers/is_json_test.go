@@ -7,6 +7,7 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
 	"github.com/mniak/gomock-contrib/internal/testing/mocks"
+	"github.com/mniak/gomock-contrib/internal/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -122,6 +123,10 @@ func TestIsJSON(t *testing.T) {
 			{
 				desc:      "string",
 				validData: gofakeit.SentenceSimple(),
+			},
+			{
+				desc:      "pointer to string",
+				validData: utils.ToPointer(gofakeit.SentenceSimple()),
 			},
 			{
 				desc:      "float64",

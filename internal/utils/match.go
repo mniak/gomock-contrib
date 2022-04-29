@@ -48,12 +48,8 @@ func asFloat(value reflect.Value) (float64, bool) {
 }
 
 func MatchValues(expected, actual reflect.Value) bool {
-	for expected.Kind() == reflect.Pointer || expected.Kind() == reflect.Interface {
-		expected = expected.Elem()
-	}
-	for actual.Kind() == reflect.Pointer || actual.Kind() == reflect.Interface {
-		actual = actual.Elem()
-	}
+	expected = UnwrapValue(expected)
+	actual = UnwrapValue(actual)
 
 	actualAsFloat, actualIsFloat := asFloat(actual)
 	expectedAsFloat, expectedIsFloat := asFloat(expected)

@@ -19,11 +19,7 @@ func HasField(name string) hasFieldMatcher {
 }
 
 func (m hasFieldMatcher) internalMatches(arg any) (any, bool) {
-	value := reflect.ValueOf(arg)
-
-	for value.Kind() == reflect.Interface || value.Kind() == reflect.Pointer {
-		value = value.Elem()
-	}
+	value := utils.UnwrapValue(reflect.ValueOf(arg))
 
 	switch value.Kind() {
 	case reflect.Struct:
@@ -31,14 +27,14 @@ func (m hasFieldMatcher) internalMatches(arg any) (any, bool) {
 		if structField.Kind() == reflect.Invalid {
 			return nil, false
 		}
-		return structField.Interface(), true
+		return utils.UnwrapValue(structField).Interface(), true
 
 	case reflect.Map:
 		mapValue := value.MapIndex(reflect.ValueOf(m.fieldName))
 		if mapValue.Kind() == reflect.Invalid {
 			return nil, false
 		}
-		return mapValue.Interface(), true
+		return utils.UnwrapValue(mapValue).Interface(), true
 	}
 	return nil, false
 }
