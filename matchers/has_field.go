@@ -74,6 +74,11 @@ func (m hasFieldThatMatchesMatcher) String() string {
 }
 
 func (m hasFieldThatMatchesMatcher) Got(arg any) string {
+	_, found := m.parent.internalMatches(arg)
+	if !found {
+		return fmt.Sprintf("data without field %s: %v (%T)", m.parent.fieldName, arg, arg)
+	}
+
 	if gf, is := m.submatcher.(gomock.GotFormatter); is {
 		subgot := gf.Got(arg)
 		return fmt.Sprintf(".%s %s", m.parent.fieldName, subgot)
