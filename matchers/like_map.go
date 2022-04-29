@@ -1,7 +1,6 @@
 package matchers
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
 
@@ -30,26 +29,16 @@ func (m likeMapMatcher) String() string {
 }
 
 func (m likeMapMatcher) Got(arg any) string {
+	if arg == nil {
+		return "nil"
+	}
 	defaultMessage := fmt.Sprintf("%+v (%T)", arg, arg)
-	var actualmap map[string]any
-	switch actual := arg.(type) {
-	case string:
-		err := json.Unmarshal([]byte(actual), &actualmap)
-		if err != nil {
-			return defaultMessage
-		}
-	case []byte:
-		err := json.Unmarshal(actual, &actualmap)
-		if err != nil {
-			return defaultMessage
-		}
-	default:
+
+	asMap, ok := arg.(map[string]any)
+	if !ok {
 		return defaultMessage
 	}
 
-	pretty, err := json.MarshalIndent(actualmap, "", "  ")
-	if err != nil {
-		return defaultMessage
-	}
-	return string(pretty)
+	pretty := utils.PrettyPrintMap(asMap)
+	return pretty
 }

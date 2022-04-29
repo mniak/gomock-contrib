@@ -414,6 +414,11 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 		expectedMessage string
 	}{
 		{
+			name:            "nil",
+			data:            nil,
+			expectedMessage: "nil",
+		},
+		{
 			name:            "empty map",
 			data:            map[string]any{},
 			expectedMessage: "map[string]any{}",
