@@ -25,5 +25,5 @@ func (m inlineJsonMatcher[T]) Matches(x string) bool {
 }
 
 func (m inlineJsonMatcher[T]) String() string {
-	return "shoud be a valid JSON string"
+	return "should be a valid JSON string"
 }

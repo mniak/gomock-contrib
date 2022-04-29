@@ -42,5 +42,5 @@ func (m jsonStringMatcher) Matches(x any) bool {
 }
 
 func (m jsonStringMatcher) String() string {
-	return "shoud be a valid JSON matching the specified map"
+	return "should be a valid JSON matching the specified map"
 }
