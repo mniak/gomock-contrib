@@ -175,14 +175,14 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 			sut:          IsJSON().ThatMatches("field_value"),
 			sampleValue:  "wrong_value",
 			expectedGot:  "is wrong_value (string)",
-			expectedWant: "should be a valid JSON that is equal to field_value (string)",
+			expectedWant: "is a valid JSON that is equal to field_value (string)",
 		},
 		{
 			name:         "Using submatcher (string)",
 			sut:          IsJSON().ThatMatches(gomock.Eq("field_value")),
 			sampleValue:  "wrong_value",
 			expectedGot:  "is wrong_value (string)",
-			expectedWant: "should be a valid JSON that is equal to field_value (string)",
+			expectedWant: "is a valid JSON that is equal to field_value (string)",
 		},
 		// Int
 		{
@@ -190,14 +190,14 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 			sut:          IsJSON().ThatMatches("field_value"),
 			sampleValue:  123,
 			expectedGot:  "is 123 (int)",
-			expectedWant: "should be a valid JSON that is equal to field_value (string)",
+			expectedWant: "is a valid JSON that is equal to field_value (string)",
 		},
 		{
 			name:         "Using value directly as matcher (int)",
 			sut:          IsJSON().ThatMatches(gomock.Eq("field_value")),
 			sampleValue:  123,
 			expectedGot:  "is 123 (int)",
-			expectedWant: "should be a valid JSON that is equal to field_value (string)",
+			expectedWant: "is a valid JSON that is equal to field_value (string)",
 		},
 		// Mocked submatcher
 		{
@@ -209,7 +209,7 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 			}(),
 			sampleValue:  "wrong_value",
 			expectedGot:  "is wrong_value (string)",
-			expectedWant: "should be a valid JSON that <submatcher.String()>",
+			expectedWant: "is a valid JSON that <submatcher.String()>",
 		},
 		{
 			name: "Using mocked submatcher (int)",
@@ -220,7 +220,7 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 			}(),
 			sampleValue:  123,
 			expectedGot:  "is 123 (int)",
-			expectedWant: "should be a valid JSON that <submatcher.String()>",
+			expectedWant: "is a valid JSON that <submatcher.String()>",
 		},
 		// Mocked submatcher that implements GotMatcher
 		{
@@ -233,7 +233,7 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 			}(),
 			sampleValue:  gofakeit.SentenceSimple(),
 			expectedGot:  "<submatcher.Got(...)>",
-			expectedWant: "should be a valid JSON that <submatcher.String()>",
+			expectedWant: "is a valid JSON that <submatcher.String()>",
 		},
 	}
 	for _, td := range testdata {

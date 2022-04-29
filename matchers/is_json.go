@@ -61,7 +61,7 @@ func (m isJSONThatMatchesMatcher) Matches(arg any) bool {
 }
 
 func (m isJSONThatMatchesMatcher) String() string {
-	return fmt.Sprintf("should be a valid JSON that %s", m.submatcher.String())
+	return fmt.Sprintf("is a valid JSON that %s", m.submatcher.String())
 }
 
 func (m isJSONThatMatchesMatcher) Got(arg any) string {
