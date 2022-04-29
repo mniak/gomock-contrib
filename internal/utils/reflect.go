@@ -8,3 +8,13 @@ func UnwrapValue(value reflect.Value) reflect.Value {
 	}
 	return value
 }
+
+func tryGetValue[T any](value reflect.Value) (T, bool) {
+	if value.CanInterface() {
+		interf := value.Interface()
+		t, ok := interf.(T)
+		return t, ok
+	}
+	var t T
+	return t, false
+}

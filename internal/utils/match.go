@@ -3,6 +3,8 @@ package utils
 import (
 	"encoding/json"
 	"reflect"
+
+	"github.com/golang/mock/gomock"
 )
 
 func MatchBytes(expected, data []byte) bool {
@@ -48,7 +50,15 @@ func asFloat(value reflect.Value) (float64, bool) {
 }
 
 func MatchValues(expected, actual reflect.Value) bool {
-	expected = UnwrapValue(expected)
+	if m, ok := tryGetValue[gomock.Matcher](expected); ok {
+		v, ok := tryGetValue[any](actual)
+		if !ok {
+			return false
+		}
+		return m.Matches(v)
+	}
+
+	// expected = UnwrapValue(expected)
 	actual = UnwrapValue(actual)
 
 	actualAsFloat, actualIsFloat := asFloat(actual)
