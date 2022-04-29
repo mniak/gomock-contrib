@@ -49,9 +49,38 @@ func TestIsJSON(t *testing.T) {
 				sut := IsJSON()
 
 				assert.Equal(t, "is valid JSON", sut.String())
-
 				assert.False(t, sut.Matches(td.invalidData), "should not match string")
+				assert.Equal(t, td.invalidData, sut.Got(td.invalidData))
 				assert.False(t, sut.Matches([]byte(td.invalidData)), "should not match bytes")
+				assert.Equal(t, td.invalidData, sut.Got([]byte(td.invalidData)))
+			})
+		}
+	})
+
+	t.Run("When not string or bytes, should fail", func(t *testing.T) {
+		testdata := []struct {
+			desc        string
+			invalidData any
+			gotMessage  string
+		}{
+			{
+				desc:        "int",
+				invalidData: 123,
+				gotMessage:  "data with invalid type: 123 (int)",
+			},
+			{
+				desc:        "boolean",
+				invalidData: false,
+				gotMessage:  "data with invalid type: false (bool)",
+			},
+		}
+		for _, td := range testdata {
+			t.Run(td.desc, func(t *testing.T) {
+				sut := IsJSON()
+
+				assert.Equal(t, "is valid JSON", sut.String())
+				assert.False(t, sut.Matches(td.invalidData), "should not match")
+				assert.Equal(t, td.gotMessage, sut.Got(td.invalidData))
 			})
 		}
 	})
@@ -129,95 +158,6 @@ func TestIsJSON(t *testing.T) {
 	})
 }
 
-// func TestIsJSON_Messages(t *testing.T) {
-// 	ctrl := gomock.NewController(t)
-// 	defer ctrl.Finish()
-
-// 	testdata := []struct {
-// 		name         string
-// 		sut          isJSONMatcher
-// 		sampleValue  any
-// 		expectedGot  string
-// 		expectedWant string
-// 	}{
-// 		// String
-// 		{
-// 			name:         "Using value directly as matcher (string)",
-// 			sut:          IsJSON().ThatMatches("field_value"),
-// 			sampleValue:  `{"key": "wrong_value"}`,
-// 			expectedGot:  "is wrong_value (string)",
-// 			expectedWant: "should be a valid JSON that is equal to field_value (string)",
-// 		},
-// 		{
-// 			name:         "Using submatcher (string)",
-// 			sut:          IsJSON().ThatMatches(gomock.Eq("field_value")),
-// 			sampleValue:  `{"key": "wrong_value"}`,
-// 			expectedGot:  "is wrong_value (string)",
-// 			expectedWant: "should be a valid JSON that is equal to field_value (string)",
-// 		},
-// 		// Int
-// 		{
-// 			name:         "Using value directly as matcher (int)",
-// 			sut:          IsJSON().ThatMatches("field_value"),
-// 			sampleValue:  123,
-// 			expectedGot:  "is 123 (int)",
-// 			expectedWant: "should be a valid JSON that is equal to field_value (string)",
-// 		},
-// 		{
-// 			name:         "Using value directly as matcher (int)",
-// 			sut:          IsJSON().ThatMatches(gomock.Eq("field_value")),
-// 			sampleValue:  123,
-// 			expectedGot:  "is 123 (int)",
-// 			expectedWant: "should be a valid JSON that is equal to field_value (string)",
-// 		},
-// 		// Mocked submatcher
-// 		{
-// 			name: "Using mocked submatcher (string)",
-// 			sut: func() isJSONThatMatchesMatcher {
-// 				mock := mocks.NewMockMatcher(ctrl)
-// 				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
-// 				return IsJSON().ThatMatches(mock)
-// 			}(),
-// 			sampleValue:  `{"key": "wrong_value"}`,
-// 			expectedGot:  "is wrong_value (string)",
-// 			expectedWant: ".MyField <submatcher.String()>",
-// 		},
-// 		{
-// 			name: "Using mocked submatcher (int)",
-// 			sut: func() isJSONThatMatchesMatcher {
-// 				mock := mocks.NewMockMatcher(ctrl)
-// 				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
-// 				return IsJSON().ThatMatches(mock)
-// 			}(),
-// 			sampleValue:  123,
-// 			expectedGot:  "is 123 (int)",
-// 			expectedWant: ".MyField <submatcher.String()>",
-// 		},
-// 		// Mocked submatcher that implements GotMatcher
-// 		{
-// 			name: "Using mocked submatcher that is GotFormatter",
-// 			sut: func() isJSONThatMatchesMatcher {
-// 				mock := mocks.NewMockGoMockMatcherAndGotFormatter(ctrl)
-// 				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
-// 				mock.EXPECT().Got(gomock.Any()).Return("<submatcher.Got(...)>").AnyTimes()
-// 				return IsJSON().ThatMatches(mock)
-// 			}(),
-// 			sampleValue:  gofakeit.SentenceSimple(),
-// 			expectedGot:  ".MyField <submatcher.Got(...)>",
-// 			expectedWant: ".MyField <submatcher.String()>",
-// 		},
-// 	}
-// 	for _, td := range testdata {
-// 		t.Run(td.name, func(t *testing.T) {
-// 			wantMessage := td.sut.String()
-// 			gotMessage := td.sut.Got(td.sampleValue)
-
-// 			assert.Equal(t, td.expectedWant, wantMessage)
-// 			assert.Equal(t, td.expectedGot, gotMessage)
-// 		})
-// 	}
-// }
-
 func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -233,14 +173,14 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 		{
 			name:         "Using value directly as matcher (string)",
 			sut:          IsJSON().ThatMatches("field_value"),
-			sampleValue:  `{"key": "wrong_value"}`,
+			sampleValue:  "wrong_value",
 			expectedGot:  "is wrong_value (string)",
 			expectedWant: "should be a valid JSON that is equal to field_value (string)",
 		},
 		{
 			name:         "Using submatcher (string)",
 			sut:          IsJSON().ThatMatches(gomock.Eq("field_value")),
-			sampleValue:  `{"key": "wrong_value"}`,
+			sampleValue:  "wrong_value",
 			expectedGot:  "is wrong_value (string)",
 			expectedWant: "should be a valid JSON that is equal to field_value (string)",
 		},
@@ -267,9 +207,9 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 				mock.EXPECT().String().Return("<submatcher.String()>").AnyTimes()
 				return IsJSON().ThatMatches(mock)
 			}(),
-			sampleValue:  `{"key": "wrong_value"}`,
+			sampleValue:  "wrong_value",
 			expectedGot:  "is wrong_value (string)",
-			expectedWant: ".MyField <submatcher.String()>",
+			expectedWant: "should be a valid JSON that <submatcher.String()>",
 		},
 		{
 			name: "Using mocked submatcher (int)",
@@ -280,7 +220,7 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 			}(),
 			sampleValue:  123,
 			expectedGot:  "is 123 (int)",
-			expectedWant: ".MyField <submatcher.String()>",
+			expectedWant: "should be a valid JSON that <submatcher.String()>",
 		},
 		// Mocked submatcher that implements GotMatcher
 		{
@@ -292,8 +232,8 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 				return IsJSON().ThatMatches(mock)
 			}(),
 			sampleValue:  gofakeit.SentenceSimple(),
-			expectedGot:  ".MyField <submatcher.Got(...)>",
-			expectedWant: ".MyField <submatcher.String()>",
+			expectedGot:  "<submatcher.Got(...)>",
+			expectedWant: "should be a valid JSON that <submatcher.String()>",
 		},
 	}
 	for _, td := range testdata {

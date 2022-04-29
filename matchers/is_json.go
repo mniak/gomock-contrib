@@ -25,6 +25,17 @@ func (m isJSONMatcher) Matches(arg any) bool {
 	}
 }
 
+func (m isJSONMatcher) Got(arg any) string {
+	switch actual := arg.(type) {
+	case string:
+		return fmt.Sprint(actual)
+	case []byte:
+		return fmt.Sprint(string(actual))
+	default:
+		return fmt.Sprintf("data with invalid type: %v (%T)", arg, arg)
+	}
+}
+
 func (m isJSONMatcher) String() string {
 	return "is valid JSON"
 }
@@ -54,5 +65,8 @@ func (m isJSONThatMatchesMatcher) String() string {
 }
 
 func (m isJSONThatMatchesMatcher) Got(arg any) string {
-	return m.submatcher.String()
+	if gf, is := m.submatcher.(gomock.GotFormatter); is {
+		return gf.Got(arg)
+	}
+	return fmt.Sprintf("is %v (%T)", arg, arg)
 }
