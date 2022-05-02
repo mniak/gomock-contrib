@@ -141,75 +141,6 @@ func TestLikeMapMatcher(t *testing.T) {
 		}
 	})
 
-	t.Run("All number types should match each other", func(t *testing.T) {
-		types := []struct {
-			typename string
-			convert  func(x float64) any
-		}{
-			// int
-			{
-				typename: "int",
-				convert:  func(x float64) any { return int(x) },
-			},
-			{
-				typename: "int8",
-				convert:  func(x float64) any { return int8(x) },
-			},
-			{
-				typename: "int16",
-				convert:  func(x float64) any { return int16(x) },
-			},
-			{
-				typename: "int32",
-				convert:  func(x float64) any { return int32(x) },
-			},
-			{
-				typename: "int64",
-				convert:  func(x float64) any { return int64(x) },
-			},
-			// uint
-			{
-				typename: "uint",
-				convert:  func(x float64) any { return uint(x) },
-			},
-			{
-				typename: "uint8",
-				convert:  func(x float64) any { return uint8(x) },
-			},
-			{
-				typename: "uint16",
-				convert:  func(x float64) any { return uint16(x) },
-			},
-			{
-				typename: "uint32",
-				convert:  func(x float64) any { return uint32(x) },
-			},
-			{
-				typename: "uint64",
-				convert:  func(x float64) any { return uint64(x) },
-			},
-		}
-
-		for _, type1 := range types {
-			for _, type2 := range types {
-				t.Run(fmt.Sprintf("%s==%s", type1.typename, type2.typename), func(t *testing.T) {
-					number := float64(gofakeit.IntRange(50, 100))
-
-					map1 := map[string]any{
-						"key": type1.convert(number),
-					}
-
-					map2 := map[string]any{
-						"key": type2.convert(number),
-					}
-
-					sut := LikeMap(map1)
-					assert.True(t, sut.Matches(map2), "should match")
-				})
-			}
-		}
-	})
-
 	t.Run("When map is exactly the same, should match", func(t *testing.T) {
 		testdata := []struct {
 			name  string
@@ -343,6 +274,75 @@ func TestLikeMapMatcher(t *testing.T) {
 				sut := LikeMap(td.expected)
 				assert.True(t, sut.Matches(td.actual), "should match")
 			})
+		}
+	})
+
+	t.Run("All number types should match each other", func(t *testing.T) {
+		types := []struct {
+			typename string
+			convert  func(x float64) any
+		}{
+			// int
+			{
+				typename: "int",
+				convert:  func(x float64) any { return int(x) },
+			},
+			{
+				typename: "int8",
+				convert:  func(x float64) any { return int8(x) },
+			},
+			{
+				typename: "int16",
+				convert:  func(x float64) any { return int16(x) },
+			},
+			{
+				typename: "int32",
+				convert:  func(x float64) any { return int32(x) },
+			},
+			{
+				typename: "int64",
+				convert:  func(x float64) any { return int64(x) },
+			},
+			// uint
+			{
+				typename: "uint",
+				convert:  func(x float64) any { return uint(x) },
+			},
+			{
+				typename: "uint8",
+				convert:  func(x float64) any { return uint8(x) },
+			},
+			{
+				typename: "uint16",
+				convert:  func(x float64) any { return uint16(x) },
+			},
+			{
+				typename: "uint32",
+				convert:  func(x float64) any { return uint32(x) },
+			},
+			{
+				typename: "uint64",
+				convert:  func(x float64) any { return uint64(x) },
+			},
+		}
+
+		for _, type1 := range types {
+			for _, type2 := range types {
+				t.Run(fmt.Sprintf("%s==%s", type1.typename, type2.typename), func(t *testing.T) {
+					number := float64(gofakeit.IntRange(50, 100))
+
+					map1 := map[string]any{
+						"key": type1.convert(number),
+					}
+
+					map2 := map[string]any{
+						"key": type2.convert(number),
+					}
+
+					sut := LikeMap(map1)
+					assert.True(t, sut.Matches(map2), "should match")
+				})
+			}
 		}
 	})
 }
