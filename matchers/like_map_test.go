@@ -514,7 +514,7 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 }`, fakeSubMatcherWant)
 			assert.Equal(t, expectedWant, sut.String())
 
-			expectedGot := fmt.Sprintf(`map[string]any{
+			expectedGot := fmt.Sprintf(`is map[string]any{
 	"Field": "%s",
 }`, fakeValue)
 
