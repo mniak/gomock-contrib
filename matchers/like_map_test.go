@@ -430,7 +430,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 }`,
 		},
 		{
-			name: "stringable struct on expecation side",
+			name: "stringable struct on want",
 			expectedMap: map[string]any{
 				"stringable": Stringable{
 					Text: "inner message",
@@ -466,7 +466,7 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 			expectedMessage: "is map[string]any{}",
 		},
 		{
-			name: "empty map",
+			name: "stringable struct on got",
 			data: map[string]any{
 				"stringable": Stringable{
 					Text: "hello world",
