@@ -16,6 +16,14 @@ var (
 	_ gomock.GotFormatter = LikeMap(map[string]any{})
 )
 
+type Stringable struct {
+	Text string
+}
+
+func (s Stringable) String() string {
+	return s.Text
+}
+
 func TestLikeMapMatcher(t *testing.T) {
 	t.Run("When maps are different, should not match", func(t *testing.T) {
 		fakenumber := int(gofakeit.Int32())
@@ -268,6 +276,28 @@ func TestLikeMapMatcher(t *testing.T) {
 					},
 				},
 			},
+			{
+				name: "stringable struct on expectation",
+				expected: map[string]any{
+					"TextField": Stringable{
+						Text: faketext,
+					},
+				},
+				actual: map[string]any{
+					"TextField": faketext,
+				},
+			},
+			{
+				name: "stringable struct on actual value",
+				expected: map[string]any{
+					"TextField": faketext,
+				},
+				actual: map[string]any{
+					"TextField": Stringable{
+						Text: faketext,
+					},
+				},
+			},
 		}
 		for _, td := range testdata {
 			t.Run(td.name, func(t *testing.T) {
@@ -399,6 +429,17 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 	},
 }`,
 		},
+		{
+			name: "stringable struct on expecation side",
+			expectedMap: map[string]any{
+				"stringable": Stringable{
+					Text: "inner message",
+				},
+			},
+			expectedMessage: `matches map[string]any{
+	"stringable": "inner message",
+}`,
+		},
 	}
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
@@ -423,6 +464,17 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 			name:            "empty map",
 			data:            map[string]any{},
 			expectedMessage: "is map[string]any{}",
+		},
+		{
+			name: "empty map",
+			data: map[string]any{
+				"stringable": Stringable{
+					Text: "hello world",
+				},
+			},
+			expectedMessage: `is map[string]any{
+	"stringable": "hello world",
+}`,
 		},
 	}
 	for _, td := range testdata {
