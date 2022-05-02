@@ -10,7 +10,7 @@ func UnwrapValue(value reflect.Value) reflect.Value {
 }
 
 func tryGetValue[T any](value reflect.Value) (T, bool) {
-	if value.CanInterface() {
+	if value.IsValid() && value.CanInterface() {
 		interf := value.Interface()
 		t, ok := interf.(T)
 		return t, ok

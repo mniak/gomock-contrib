@@ -168,6 +168,10 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 		return fmt.Sprintf("&%s", elemPretty)
 
 	case reflect.Struct:
+		if stringer, isStringer := value.Interface().(fmt.Stringer); isStringer {
+			return strconv.Quote(stringer.String())
+		}
+
 		structType := value.Type()
 		structTypeStr := internalPrettyPrintType(structType, newlinePrefix)
 		numFields := value.NumField()

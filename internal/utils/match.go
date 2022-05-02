@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"reflect"
 
 	"github.com/golang/mock/gomock"
@@ -58,6 +59,14 @@ func MatchValues(expected, actual reflect.Value) bool {
 		return m.Matches(v)
 	}
 
+	if stringer, ok := tryGetValue[fmt.Stringer](expected); ok {
+		expected = reflect.ValueOf(stringer.String())
+	}
+
+	if stringer, ok := tryGetValue[fmt.Stringer](actual); ok {
+		actual = reflect.ValueOf(stringer.String())
+	}
+
 	expected = UnwrapValue(expected)
 	actual = UnwrapValue(actual)
 
@@ -80,6 +89,7 @@ func MatchValues(expected, actual reflect.Value) bool {
 			}
 		}
 		return true
+
 	case reflect.Slice:
 		if actual.Len() != expected.Len() {
 			return false
@@ -94,7 +104,10 @@ func MatchValues(expected, actual reflect.Value) bool {
 		}
 		return true
 	}
-	return actual.Interface() == expected.Interface()
+
+	rexp := expected.Interface()
+	ract := actual.Interface()
+	return ract == rexp
 }
 
 func MatchJSON[T any](arg any) (T, bool) {
