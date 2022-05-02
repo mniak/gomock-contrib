@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golang/mock/gomock"
 	"golang.org/x/exp/slices"
 )
 
@@ -16,7 +17,20 @@ func PrettyPrintMap(m map[string]any) string {
 	return internalPrettyPrint(value, "")
 }
 
+var gomockMatcherType = reflect.TypeOf((*gomock.Matcher)(nil)).Elem()
+
 func internalPrettyPrintType(rtype reflect.Type, newlinePrefix string) string {
+	typename := fmt.Sprint(rtype)
+	_ = typename
+	if rtype.Implements(gomockMatcherType) {
+		fmt.Println("")
+	}
+	if rtype.AssignableTo(gomockMatcherType) {
+		fmt.Println("")
+	}
+	if rtype.ConvertibleTo(gomockMatcherType) {
+		fmt.Println("")
+	}
 	if rtype.Kind() == reflect.Pointer {
 		return "*" + internalPrettyPrintType(rtype.Elem(), newlinePrefix)
 	}
@@ -136,6 +150,9 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 		return strconv.FormatBool(value.Bool())
 
 	case reflect.Interface:
+		if value.Type().Implements(gomockMatcherType) {
+			fmt.Println("")
+		}
 		return internalPrettyPrint(value.Elem(), newlinePrefix)
 	case reflect.Pointer:
 		elemPretty := internalPrettyPrint(value.Elem(), newlinePrefix)

@@ -451,8 +451,8 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 
 			mock := mocks.NewMockMatcherGotFormatter(ctrl)
 			mock.EXPECT().Matches(fakeValue).Return(b)
-			// mock.EXPECT().String().Return(fakeSubMatcherWant)
-			// mock.EXPECT().Got(sample).Return(fakeSubMatcherGot)
+			mock.EXPECT().String().Return(fakeSubMatcherWant)
+			mock.EXPECT().Got(sample).Return(fakeSubMatcherGot)
 
 			sut := LikeMap(map[string]any{
 				"SubMatcher": mock,
@@ -467,9 +467,8 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 }`, fakeSubMatcherGot)
 
 			assert.Equal(t, b, sut.Matches(sample))
-			_ = expectedWant
 			_ = expectedGot
-			// assert.Equal(t, expectedWant, sut.String())
+			assert.Equal(t, expectedWant, sut.String())
 			// assert.Equal(t, expectedGot, sut.Got(sample))
 		})
 	}

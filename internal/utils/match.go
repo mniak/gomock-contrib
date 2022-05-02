@@ -58,7 +58,7 @@ func MatchValues(expected, actual reflect.Value) bool {
 		return m.Matches(v)
 	}
 
-	// expected = UnwrapValue(expected)
+	expected = UnwrapValue(expected)
 	actual = UnwrapValue(actual)
 
 	actualAsFloat, actualIsFloat := asFloat(actual)
