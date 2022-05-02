@@ -435,10 +435,7 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 }
 
 func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
-	testdata := []bool{
-		true,
-		// false,
-	}
+	testdata := []bool{true, false}
 	for _, b := range testdata {
 		t.Run(fmt.Sprint(b), func(t *testing.T) {
 			ctrl := gomock.NewController(t)
@@ -446,7 +443,6 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 
 			fakeValue := gofakeit.SentenceSimple()
 			fakeSubMatcherWant := gofakeit.SentenceSimple()
-			// fakeSubMatcherGot := gofakeit.SentenceSimple()
 
 			sample := map[string]any{
 				"Field": fakeValue,
@@ -455,7 +451,6 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 			mock := mocks.NewMockMatcherGotFormatter(ctrl)
 			mock.EXPECT().Matches(fakeValue).Return(b)
 			mock.EXPECT().String().Return(fakeSubMatcherWant)
-			// mock.EXPECT().Got(sample).Return(fakeSubMatcherGot)
 
 			sut := LikeMap(map[string]any{
 				"Field": mock,
@@ -467,11 +462,11 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 }`, fakeSubMatcherWant)
 			assert.Equal(t, expectedWant, sut.String())
 
-			// 			expectedGot := fmt.Sprintf(`map[string]any{
-			// 	"Field": "%s",
-			// }`, fakeSubMatcherGot)
+			expectedGot := fmt.Sprintf(`map[string]any{
+	"Field": "%s",
+}`, fakeValue)
 
-			// assert.Equal(t, expectedGot, sut.Got(sample))
+			assert.Equal(t, expectedGot, sut.Got(sample))
 		})
 	}
 }
