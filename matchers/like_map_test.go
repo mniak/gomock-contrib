@@ -7,6 +7,7 @@ import (
 
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/golang/mock/gomock"
+	"github.com/mniak/gomock-contrib/internal/testing/mocks"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -14,6 +15,14 @@ var (
 	_ gomock.Matcher      = LikeMap(map[string]any{})
 	_ gomock.GotFormatter = LikeMap(map[string]any{})
 )
+
+type Stringable struct {
+	Text string
+}
+
+func (s Stringable) String() string {
+	return s.Text
+}
 
 func TestLikeMapMatcher(t *testing.T) {
 	t.Run("When maps are different, should not match", func(t *testing.T) {
@@ -137,75 +146,6 @@ func TestLikeMapMatcher(t *testing.T) {
 				sut := LikeMap(td.expected)
 				assert.False(t, sut.Matches(td.actual), "should not match")
 			})
-		}
-	})
-
-	t.Run("All number types should match each other", func(t *testing.T) {
-		types := []struct {
-			typename string
-			convert  func(x float64) any
-		}{
-			// int
-			{
-				typename: "int",
-				convert:  func(x float64) any { return int(x) },
-			},
-			{
-				typename: "int8",
-				convert:  func(x float64) any { return int8(x) },
-			},
-			{
-				typename: "int16",
-				convert:  func(x float64) any { return int16(x) },
-			},
-			{
-				typename: "int32",
-				convert:  func(x float64) any { return int32(x) },
-			},
-			{
-				typename: "int64",
-				convert:  func(x float64) any { return int64(x) },
-			},
-			// uint
-			{
-				typename: "uint",
-				convert:  func(x float64) any { return uint(x) },
-			},
-			{
-				typename: "uint8",
-				convert:  func(x float64) any { return uint8(x) },
-			},
-			{
-				typename: "uint16",
-				convert:  func(x float64) any { return uint16(x) },
-			},
-			{
-				typename: "uint32",
-				convert:  func(x float64) any { return uint32(x) },
-			},
-			{
-				typename: "uint64",
-				convert:  func(x float64) any { return uint64(x) },
-			},
-		}
-
-		for _, type1 := range types {
-			for _, type2 := range types {
-				t.Run(fmt.Sprintf("%s==%s", type1.typename, type2.typename), func(t *testing.T) {
-					number := float64(gofakeit.IntRange(50, 100))
-
-					map1 := map[string]any{
-						"key": type1.convert(number),
-					}
-
-					map2 := map[string]any{
-						"key": type2.convert(number),
-					}
-
-					sut := LikeMap(map1)
-					assert.True(t, sut.Matches(map2), "should match")
-				})
-			}
 		}
 	})
 
@@ -336,12 +276,103 @@ func TestLikeMapMatcher(t *testing.T) {
 					},
 				},
 			},
+			{
+				name: "stringable struct on expectation",
+				expected: map[string]any{
+					"TextField": Stringable{
+						Text: faketext,
+					},
+				},
+				actual: map[string]any{
+					"TextField": faketext,
+				},
+			},
+			{
+				name: "stringable struct on actual value",
+				expected: map[string]any{
+					"TextField": faketext,
+				},
+				actual: map[string]any{
+					"TextField": Stringable{
+						Text: faketext,
+					},
+				},
+			},
 		}
 		for _, td := range testdata {
 			t.Run(td.name, func(t *testing.T) {
 				sut := LikeMap(td.expected)
 				assert.True(t, sut.Matches(td.actual), "should match")
 			})
+		}
+	})
+
+	t.Run("All number types should match each other", func(t *testing.T) {
+		types := []struct {
+			typename string
+			convert  func(x float64) any
+		}{
+			// int
+			{
+				typename: "int",
+				convert:  func(x float64) any { return int(x) },
+			},
+			{
+				typename: "int8",
+				convert:  func(x float64) any { return int8(x) },
+			},
+			{
+				typename: "int16",
+				convert:  func(x float64) any { return int16(x) },
+			},
+			{
+				typename: "int32",
+				convert:  func(x float64) any { return int32(x) },
+			},
+			{
+				typename: "int64",
+				convert:  func(x float64) any { return int64(x) },
+			},
+			// uint
+			{
+				typename: "uint",
+				convert:  func(x float64) any { return uint(x) },
+			},
+			{
+				typename: "uint8",
+				convert:  func(x float64) any { return uint8(x) },
+			},
+			{
+				typename: "uint16",
+				convert:  func(x float64) any { return uint16(x) },
+			},
+			{
+				typename: "uint32",
+				convert:  func(x float64) any { return uint32(x) },
+			},
+			{
+				typename: "uint64",
+				convert:  func(x float64) any { return uint64(x) },
+			},
+		}
+
+		for _, type1 := range types {
+			for _, type2 := range types {
+				t.Run(fmt.Sprintf("%s==%s", type1.typename, type2.typename), func(t *testing.T) {
+					number := float64(gofakeit.IntRange(50, 100))
+
+					map1 := map[string]any{
+						"key": type1.convert(number),
+					}
+
+					map2 := map[string]any{
+						"key": type2.convert(number),
+					}
+
+					sut := LikeMap(map1)
+					assert.True(t, sut.Matches(map2), "should match")
+				})
+			}
 		}
 	})
 }
@@ -398,6 +429,17 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 	},
 }`,
 		},
+		{
+			name: "stringable struct on want",
+			expectedMap: map[string]any{
+				"stringable": Stringable{
+					Text: "inner message",
+				},
+			},
+			expectedMessage: `matches map[string]any{
+	"stringable": "inner message",
+}`,
+		},
 	}
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
@@ -416,12 +458,23 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 		{
 			name:            "nil",
 			data:            nil,
-			expectedMessage: "nil",
+			expectedMessage: "is nil",
 		},
 		{
 			name:            "empty map",
 			data:            map[string]any{},
-			expectedMessage: "map[string]any{}",
+			expectedMessage: "is map[string]any{}",
+		},
+		{
+			name: "stringable struct on got",
+			data: map[string]any{
+				"stringable": Stringable{
+					Text: "hello world",
+				},
+			},
+			expectedMessage: `is map[string]any{
+	"stringable": "hello world",
+}`,
 		},
 	}
 	for _, td := range testdata {
@@ -429,6 +482,43 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 			expectedMap := map[string]any{gofakeit.UUID(): gofakeit.SentenceSimple()}
 			sut := LikeMap(expectedMap)
 			assert.Equal(t, td.expectedMessage, sut.Got(td.data))
+		})
+	}
+}
+
+func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
+	testdata := []bool{true, false}
+	for _, b := range testdata {
+		t.Run(fmt.Sprint(b), func(t *testing.T) {
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			fakeValue := gofakeit.SentenceSimple()
+			fakeSubMatcherWant := gofakeit.SentenceSimple()
+
+			sample := map[string]any{
+				"Field": fakeValue,
+			}
+
+			mock := mocks.NewMockMatcherGotFormatter(ctrl)
+			mock.EXPECT().Matches(fakeValue).Return(b)
+			mock.EXPECT().String().Return(fakeSubMatcherWant)
+
+			sut := LikeMap(map[string]any{
+				"Field": mock,
+			})
+			assert.Equal(t, b, sut.Matches(sample))
+
+			expectedWant := fmt.Sprintf(`matches map[string]any{
+	"Field": "%s",
+}`, fakeSubMatcherWant)
+			assert.Equal(t, expectedWant, sut.String())
+
+			expectedGot := fmt.Sprintf(`is map[string]any{
+	"Field": "%s",
+}`, fakeValue)
+
+			assert.Equal(t, expectedGot, sut.Got(sample))
 		})
 	}
 }

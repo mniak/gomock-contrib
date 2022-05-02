@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/golang/mock/gomock"
 	"golang.org/x/exp/slices"
 )
 
@@ -16,18 +17,25 @@ func PrettyPrintMap(m map[string]any) string {
 	return internalPrettyPrint(value, "")
 }
 
-func internalPrettyPrintType(rtype reflect.Type) string {
+var gomockMatcherType = reflect.TypeOf((*gomock.Matcher)(nil)).Elem()
+
+func internalPrettyPrintType(rtype reflect.Type, newlinePrefix string) string {
+	typename := fmt.Sprint(rtype)
+	_ = typename
+	if rtype.Implements(gomockMatcherType) {
+		fmt.Println("")
+	}
+	if rtype.AssignableTo(gomockMatcherType) {
+		fmt.Println("")
+	}
+	if rtype.ConvertibleTo(gomockMatcherType) {
+		fmt.Println("")
+	}
 	if rtype.Kind() == reflect.Pointer {
-		return "*" + internalPrettyPrintType(rtype.Elem())
+		return "*" + internalPrettyPrintType(rtype.Elem(), newlinePrefix)
 	}
 
-	k := rtype.Kind()
-	switch k {
-	case reflect.Map:
-		keyStr := internalPrettyPrintType(rtype.Key())
-		valueStr := internalPrettyPrintType(rtype.Elem())
-		return fmt.Sprintf("map[%s]%s", keyStr, valueStr)
-
+	switch rtype.Kind() {
 	case reflect.Interface:
 		name := rtype.Name()
 		if name != "" {
@@ -35,21 +43,61 @@ func internalPrettyPrintType(rtype reflect.Type) string {
 		} else {
 			return "any"
 		}
-	case reflect.String:
-		return rtype.Name()
+
+	case reflect.Map:
+		keyStr := internalPrettyPrintType(rtype.Key(), newlinePrefix)
+		valueStr := internalPrettyPrintType(rtype.Elem(), newlinePrefix)
+		return fmt.Sprintf("map[%s]%s", keyStr, valueStr)
+
+	case reflect.Struct:
+		numFields := rtype.NumField()
+		if numFields == 0 {
+			return "struct {}"
+		}
+
+		lines := make([]string, numFields)
+		for idx := 0; idx < numFields; idx++ {
+			field := rtype.FieldByIndex([]int{idx})
+			fieldNameStr := field.Name
+			fieldTypeStr := internalPrettyPrintType(field.Type, newlinePrefix+prettyPrintIndentation)
+
+			lines[idx] = fmt.Sprintf("%s%s %s\n%s",
+				prettyPrintIndentation,
+				fieldNameStr,
+				fieldTypeStr,
+				newlinePrefix,
+			)
+		}
+		slices.Sort(lines)
+		return fmt.Sprintf("struct {\n%s%s}", newlinePrefix, strings.Join(lines, ""))
+
 	default:
-		return fmt.Sprintf("(could not format type %+v)", rtype)
+		return rtype.Name()
 	}
 }
 
-func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
-	for value.Kind() == reflect.Interface {
-		value = value.Elem()
-	}
-	kind := value.Kind()
-	switch kind {
+func valueIsNillable(value reflect.Value) bool {
+	switch value.Kind() {
+	case reflect.Chan:
+	case reflect.Func:
 	case reflect.Map:
-		mapTypeStr := internalPrettyPrintType(value.Type())
+	case reflect.Pointer, reflect.UnsafePointer:
+	case reflect.Interface:
+	case reflect.Slice:
+	default:
+		return false
+	}
+	return true
+}
+
+func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
+	if valueIsNillable(value) && value.IsNil() {
+		return "nil"
+	}
+	vk := value.Kind()
+	switch vk {
+	case reflect.Map:
+		mapTypeStr := internalPrettyPrintType(value.Type(), newlinePrefix)
 		mapKeys := value.MapKeys()
 
 		if len(mapKeys) == 0 {
@@ -74,7 +122,7 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 		return fmt.Sprintf("%s{\n%s%s}", mapTypeStr, newlinePrefix, strings.Join(lines, ""))
 
 	case reflect.Slice:
-		sliceTypeStr := internalPrettyPrintType(value.Type().Elem())
+		sliceTypeStr := internalPrettyPrintType(value.Type().Elem(), newlinePrefix)
 
 		length := value.Len()
 		if length == 0 {
@@ -93,27 +141,63 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 			)
 		}
 		return fmt.Sprintf("[]%s{\n%s%s}", sliceTypeStr, newlinePrefix, strings.Join(lines, ""))
+
 	case reflect.String:
-		return fmt.Sprintf("%v", strconv.Quote(value.String()))
+		return strconv.Quote(value.String())
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		return strconv.Itoa(int(value.Int()))
-	// case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-	// 	fallthrough
-	// case reflect.Float32, reflect.Float64:
-	// 	fallthrough
-	// case reflect.Bool:
-	// 	sb.WriteString(fmt.Sprintf("%s%v", linePrefix, value.Interface()))
-	// case reflect.UnsafePointer:
-	// case reflect.Struct:
-	// case reflect.Complex64:
-	// case reflect.Complex128:
-	// case reflect.Array:
-	// case reflect.Chan:
-	// case reflect.Func:
-	// case reflect.Interface:
-	// case reflect.Pointer:
+
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return strconv.Itoa(int(value.Uint()))
+
+	case reflect.Float32, reflect.Float64:
+		return strconv.Itoa(int(value.Float()))
+
+	case reflect.Bool:
+		return strconv.FormatBool(value.Bool())
+
+	case reflect.Interface:
+		if m, ok := tryGetValue[gomock.Matcher](value); ok {
+			return strconv.Quote(m.String())
+		}
+		return internalPrettyPrint(value.Elem(), newlinePrefix)
+
+	case reflect.Pointer:
+		elemPretty := internalPrettyPrint(value.Elem(), newlinePrefix)
+		return fmt.Sprintf("&%s", elemPretty)
+
+	case reflect.Struct:
+		if stringer, isStringer := value.Interface().(fmt.Stringer); isStringer {
+			return strconv.Quote(stringer.String())
+		}
+
+		structType := value.Type()
+		structTypeStr := internalPrettyPrintType(structType, newlinePrefix)
+		numFields := value.NumField()
+		if numFields == 0 {
+			return fmt.Sprintf("%s{}", structTypeStr)
+		}
+
+		lines := make([]string, numFields)
+
+		for idx := 0; idx < numFields; idx++ {
+			value := value.FieldByIndex([]int{idx})
+			keyStr := structType.FieldByIndex([]int{idx}).Name
+			valueStr := internalPrettyPrint(value, newlinePrefix+prettyPrintIndentation)
+
+			lines[idx] = fmt.Sprintf("%s%s: %s,\n%s",
+				prettyPrintIndentation,
+				keyStr,
+				valueStr,
+				newlinePrefix,
+			)
+		}
+		slices.Sort(lines)
+		return fmt.Sprintf("%s{\n%s%s}", structTypeStr, newlinePrefix, strings.Join(lines, ""))
+
 	default:
-		return fmt.Sprintf("(could not format %T)", value.Interface())
+		v := value.Interface()
+		return fmt.Sprintf("%v (%T)", v, v)
 	}
 }

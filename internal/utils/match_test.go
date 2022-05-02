@@ -180,6 +180,15 @@ func Test_matchMaps(t *testing.T) {
 				typename: "uint64",
 				convert:  func(x float64) any { return uint64(x) },
 			},
+			// float
+			{
+				typename: "float64",
+				convert:  func(x float64) any { return x },
+			},
+			{
+				typename: "float32",
+				convert:  func(x float64) any { return float32(x) },
+			},
 		}
 
 		for _, type1 := range types {
