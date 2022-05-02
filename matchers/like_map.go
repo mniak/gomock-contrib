@@ -30,9 +30,9 @@ func (m likeMapMatcher) String() string {
 
 func (m likeMapMatcher) Got(arg any) string {
 	if arg == nil {
-		return "nil"
+		return "is nil"
 	}
-	defaultMessage := fmt.Sprintf("%+v (%T)", arg, arg)
+	defaultMessage := fmt.Sprintf("is %+v (%T)", arg, arg)
 
 	asMap, ok := arg.(map[string]any)
 	if !ok {
@@ -40,5 +40,5 @@ func (m likeMapMatcher) Got(arg any) string {
 	}
 
 	pretty := utils.PrettyPrintMap(asMap)
-	return pretty
+	return fmt.Sprintf("is %s", pretty)
 }

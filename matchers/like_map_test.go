@@ -417,12 +417,12 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 		{
 			name:            "nil",
 			data:            nil,
-			expectedMessage: "nil",
+			expectedMessage: "is nil",
 		},
 		{
 			name:            "empty map",
 			data:            map[string]any{},
-			expectedMessage: "map[string]any{}",
+			expectedMessage: "is map[string]any{}",
 		},
 	}
 	for _, td := range testdata {

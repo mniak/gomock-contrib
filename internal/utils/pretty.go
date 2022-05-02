@@ -94,7 +94,8 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 	if valueIsNillable(value) && value.IsNil() {
 		return "nil"
 	}
-	switch value.Kind() {
+	vk := value.Kind()
+	switch vk {
 	case reflect.Map:
 		mapTypeStr := internalPrettyPrintType(value.Type(), newlinePrefix)
 		mapKeys := value.MapKeys()
