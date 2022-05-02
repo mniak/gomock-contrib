@@ -161,9 +161,11 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 			return strconv.Quote(m.String())
 		}
 		return internalPrettyPrint(value.Elem(), newlinePrefix)
+
 	case reflect.Pointer:
 		elemPretty := internalPrettyPrint(value.Elem(), newlinePrefix)
 		return fmt.Sprintf("&%s", elemPretty)
+
 	case reflect.Struct:
 		structType := value.Type()
 		structTypeStr := internalPrettyPrintType(structType, newlinePrefix)
