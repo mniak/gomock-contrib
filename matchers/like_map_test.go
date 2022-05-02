@@ -445,7 +445,7 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 			defer ctrl.Finish()
 
 			fakeValue := gofakeit.SentenceSimple()
-			// fakeSubMatcherWant := gofakeit.SentenceSimple()
+			fakeSubMatcherWant := gofakeit.SentenceSimple()
 			// fakeSubMatcherGot := gofakeit.SentenceSimple()
 
 			sample := map[string]any{
@@ -454,7 +454,7 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 
 			mock := mocks.NewMockMatcherGotFormatter(ctrl)
 			mock.EXPECT().Matches(fakeValue).Return(b)
-			// mock.EXPECT().String().Return(fakeSubMatcherWant)
+			mock.EXPECT().String().Return(fakeSubMatcherWant)
 			// mock.EXPECT().Got(sample).Return(fakeSubMatcherGot)
 
 			sut := LikeMap(map[string]any{
@@ -462,15 +462,15 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 			})
 			assert.Equal(t, b, sut.Matches(sample))
 
-			// 			expectedWant := fmt.Sprintf(`match map[string]any{
-			// 	"Field": "%s",
-			// }`, fakeSubMatcherWant)
+			expectedWant := fmt.Sprintf(`matches map[string]any{
+	"Field": "%s",
+}`, fakeSubMatcherWant)
+			assert.Equal(t, expectedWant, sut.String())
 
 			// 			expectedGot := fmt.Sprintf(`map[string]any{
 			// 	"Field": "%s",
 			// }`, fakeSubMatcherGot)
 
-			// assert.Equal(t, expectedWant, sut.String())
 			// assert.Equal(t, expectedGot, sut.Got(sample))
 		})
 	}

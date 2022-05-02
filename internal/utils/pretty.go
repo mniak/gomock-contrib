@@ -150,8 +150,8 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 		return strconv.FormatBool(value.Bool())
 
 	case reflect.Interface:
-		if value.Type().Implements(gomockMatcherType) {
-			fmt.Println("")
+		if m, ok := tryGetValue[gomock.Matcher](value); ok {
+			return strconv.Quote(m.String())
 		}
 		return internalPrettyPrint(value.Elem(), newlinePrefix)
 	case reflect.Pointer:
