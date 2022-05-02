@@ -141,6 +141,7 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 			)
 		}
 		return fmt.Sprintf("[]%s{\n%s%s}", sliceTypeStr, newlinePrefix, strings.Join(lines, ""))
+
 	case reflect.String:
 		return strconv.Quote(value.String())
 
@@ -190,6 +191,7 @@ func internalPrettyPrint(value reflect.Value, newlinePrefix string) string {
 		}
 		slices.Sort(lines)
 		return fmt.Sprintf("%s{\n%s%s}", structTypeStr, newlinePrefix, strings.Join(lines, ""))
+
 	default:
 		v := value.Interface()
 		return fmt.Sprintf("%v (%T)", v, v)
