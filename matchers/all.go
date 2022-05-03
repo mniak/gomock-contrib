@@ -1,6 +1,10 @@
 package matchers
 
-import "github.com/golang/mock/gomock"
+import (
+	"strings"
+
+	"github.com/golang/mock/gomock"
+)
 
 type allMatcher struct {
 	submatchers []gomock.Matcher
@@ -26,7 +30,14 @@ func (m allMatcher) Matches(arg any) bool {
 }
 
 func (m allMatcher) String() string {
-	return ""
+	if m.submatchers == nil {
+		return "anything"
+	}
+	resultList := make([]string, len(m.submatchers))
+	for idx, subm := range m.submatchers {
+		resultList[idx] = subm.String()
+	}
+	return strings.Join(resultList, ";\n")
 }
 
 func (m allMatcher) Got(got any) string {

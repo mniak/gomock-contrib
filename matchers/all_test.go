@@ -1,6 +1,7 @@
 package matchers
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v6"
@@ -72,5 +73,30 @@ func TestAll_Matches(t *testing.T) {
 				assert.Equal(t, td.expected, result)
 			})
 		}
+	})
+}
+
+func TestAll_WantMessage(t *testing.T) {
+	t.Run("When no submatchers, return 'anything'", func(t *testing.T) {
+		sut := All()
+		assert.Equal(t, "anything", sut.String())
+	})
+	t.Run("Happy scenario", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		mock1 := mocks.NewMockMatcherGotFormatter(ctrl)
+		mock1Want := gofakeit.SentenceSimple()
+		mock1.EXPECT().String().Return(mock1Want)
+
+		mock2 := mocks.NewMockMatcherGotFormatter(ctrl)
+		mock2Want := gofakeit.SentenceSimple()
+		mock2.EXPECT().String().Return(mock2Want)
+
+		sut := All(mock1, mock2)
+
+		result := sut.String()
+		expected := fmt.Sprintf("%s;\n%s", mock1Want, mock2Want)
+		assert.Equal(t, expected, result)
 	})
 }
