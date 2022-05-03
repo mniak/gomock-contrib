@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrettyPrintMap(t *testing.T) {
+func TestPrettyPrint(t *testing.T) {
 	testdata := []struct {
 		name     string
 		sample   map[string]any
@@ -110,7 +110,7 @@ func TestPrettyPrintMap(t *testing.T) {
 	}
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
-			result := PrettyPrintMap(td.sample)
+			result := PrettyPrint(td.sample)
 			assert.Equal(t, td.expected, result)
 		})
 	}

@@ -24,7 +24,7 @@ func (m likeMapMatcher) Matches(arg any) bool {
 }
 
 func (m likeMapMatcher) String() string {
-	pretty := utils.PrettyPrintMap(m.expectedMap)
+	pretty := utils.PrettyPrint(m.expectedMap)
 	return fmt.Sprintf("matches %s", pretty)
 }
 
@@ -39,6 +39,6 @@ func (m likeMapMatcher) Got(arg any) string {
 		return defaultMessage
 	}
 
-	pretty := utils.PrettyPrintMap(asMap)
+	pretty := utils.PrettyPrint(asMap)
 	return fmt.Sprintf("is %s", pretty)
 }
