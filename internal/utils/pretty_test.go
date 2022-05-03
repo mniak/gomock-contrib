@@ -110,7 +110,7 @@ func TestPrettyPrintMap(t *testing.T) {
 	}
 	for _, td := range testdata {
 		t.Run(td.name, func(t *testing.T) {
-			result := PrettyPrintMap(td.sample)
+			result := PrettyPrint(td.sample)
 			assert.Equal(t, td.expected, result)
 		})
 	}
