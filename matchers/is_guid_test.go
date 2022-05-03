@@ -7,8 +7,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIsValidGUID(t *testing.T) {
-	sut := IsValidGUID()
+func TestIsGUID(t *testing.T) {
+	sut := IsGUID()
 
 	assert.False(t, sut.Matches(gofakeit.SentenceSimple()))
 	assert.True(t, sut.Matches(gofakeit.UUID()))

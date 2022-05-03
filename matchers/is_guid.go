@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func IsValidGUID() gomock.Matcher {
+func IsGUID() gomock.Matcher {
 	return Inline("is valid GUID", func(arg any) bool {
 		cid, isString := arg.(string)
 		if !isString {
