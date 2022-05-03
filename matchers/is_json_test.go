@@ -51,9 +51,9 @@ func TestIsJSON(t *testing.T) {
 
 				assert.Equal(t, "is valid JSON", sut.String())
 				assert.False(t, sut.Matches(td.invalidData), "should not match string")
-				assert.Equal(t, "is "+td.invalidData+" (string)", sut.Got(td.invalidData))
+				assert.Equal(t, "is malformed JSON: "+td.invalidData+" (string)", sut.Got(td.invalidData))
 				assert.False(t, sut.Matches([]byte(td.invalidData)), "should not match bytes")
-				assert.Equal(t, "is "+td.invalidData+" ([]byte)", sut.Got([]byte(td.invalidData)))
+				assert.Equal(t, "is malformed JSON: "+td.invalidData+" ([]byte)", sut.Got([]byte(td.invalidData)))
 			})
 		}
 	})
@@ -197,14 +197,14 @@ func TestIsJSON_ThatMatches_Messages(t *testing.T) {
 			expectedWant: "is a valid JSON that <wrong_bool>",
 		},
 		{
-			name: "Ill-formatted json",
+			name: "malformed json",
 			sut: func() isJSONThatMatchesMatcher {
 				mock := mocks.NewMockMatcherGotFormatter(ctrl)
 				mock.EXPECT().String().Return("<ill_test>")
 				return IsJSON().ThatMatches(mock)
 			}(),
 			sampleValue:  `{ "key": "value"`,
-			expectedGot:  `is { "key": "value" (string)`,
+			expectedGot:  `is malformed JSON: { "key": "value" (string)`,
 			expectedWant: "is a valid JSON that <ill_test>",
 		},
 		{
