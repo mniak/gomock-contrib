@@ -1,10 +1,10 @@
 package matchers
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mniak/gomock-contrib/internal/utils"
 )
 
 type allMatcher struct {
@@ -42,7 +42,7 @@ func (m allMatcher) String() string {
 }
 
 func (m allMatcher) Got(arg any) string {
-	fallbackMessage := fmt.Sprintf("is %v (%T)", arg, arg)
+	fallbackMessage := utils.PrettyPrint(arg)
 	if m.submatchers == nil {
 		return fallbackMessage
 	}
