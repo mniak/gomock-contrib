@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrettyPrintMap(t *testing.T) {
+func TestPrettyPrint(t *testing.T) {
 	testdata := []struct {
 		name     string
 		sample   map[string]any

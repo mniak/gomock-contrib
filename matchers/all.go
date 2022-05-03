@@ -1,10 +1,10 @@
 package matchers
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/golang/mock/gomock"
-	"github.com/mniak/gomock-contrib/internal/utils"
 )
 
 type allMatcher struct {
@@ -42,8 +42,9 @@ func (m allMatcher) String() string {
 }
 
 func (m allMatcher) Got(arg any) string {
+	fallbackMessage := fmt.Sprintf("is %v (%T)", arg, arg)
 	if m.submatchers == nil {
-		return utils.PrettyPrint(arg)
+		return fallbackMessage
 	}
 	presenceList := make(map[string]bool)
 	resultList := make([]string, 0)
@@ -59,6 +60,9 @@ func (m allMatcher) Got(arg any) string {
 		}
 		presenceList[result] = true
 		resultList = append(resultList, result)
+	}
+	if len(resultList) == 0 {
+		return fallbackMessage
 	}
 	return strings.Join(resultList, ";\n")
 }
