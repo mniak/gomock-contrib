@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/golang/mock/gomock"
+	"github.com/mniak/gomock-contrib/internal/utils"
 )
 
 type allMatcher struct {
@@ -37,9 +38,27 @@ func (m allMatcher) String() string {
 	for idx, subm := range m.submatchers {
 		resultList[idx] = subm.String()
 	}
-	return strings.Join(resultList, ";\n")
+	return strings.Join(resultList, ";\n and ")
 }
 
-func (m allMatcher) Got(got any) string {
-	return ""
+func (m allMatcher) Got(arg any) string {
+	if m.submatchers == nil {
+		return utils.PrettyPrint(arg)
+	}
+	presenceList := make(map[string]bool)
+	resultList := make([]string, 0)
+	for _, subm := range m.submatchers {
+		gottable, ok := subm.(gomock.GotFormatter)
+		if !ok {
+			continue
+		}
+		result := gottable.Got(arg)
+		isPresent := presenceList[result]
+		if isPresent {
+			continue
+		}
+		presenceList[result] = true
+		resultList = append(resultList, result)
+	}
+	return strings.Join(resultList, ";\n")
 }

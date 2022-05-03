@@ -96,7 +96,60 @@ func TestAll_WantMessage(t *testing.T) {
 		sut := All(mock1, mock2)
 
 		result := sut.String()
-		expected := fmt.Sprintf("%s;\n%s", mock1Want, mock2Want)
+		expected := fmt.Sprintf("%s;\n and %s", mock1Want, mock2Want)
+		assert.Equal(t, expected, result)
+	})
+}
+
+func TestAll_GotMessage(t *testing.T) {
+	t.Run("When no submatchers, fallback to pretty print", func(t *testing.T) {
+		sample := map[string]any{
+			"key1": 1234,
+		}
+		sut := All()
+		got := sut.Got(sample)
+		assert.Equal(t, `map[string]any{
+	"key1": 1234,
+}`, got)
+	})
+	t.Run("When messages different, should list both", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		sample := gofakeit.Address()
+
+		mock1 := mocks.NewMockMatcherGotFormatter(ctrl)
+		mock1Got := gofakeit.SentenceSimple()
+		mock1.EXPECT().Got(sample).Return(mock1Got)
+
+		mock2 := mocks.NewMockMatcherGotFormatter(ctrl)
+		mock2Got := gofakeit.SentenceSimple()
+		mock2.EXPECT().Got(sample).Return(mock2Got)
+
+		sut := All(mock1, mock2)
+
+		result := sut.Got(sample)
+		expected := fmt.Sprintf("%s;\n%s", mock1Got, mock2Got)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("When messages equal, should deduplicate", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		sample := gofakeit.Address()
+		got := gofakeit.SentenceSimple()
+
+		mock1 := mocks.NewMockMatcherGotFormatter(ctrl)
+		mock1.EXPECT().Got(sample).Return(got)
+
+		mock2 := mocks.NewMockMatcherGotFormatter(ctrl)
+		mock2.EXPECT().Got(sample).Return(got)
+
+		sut := All(mock1, mock2)
+
+		result := sut.Got(sample)
+		expected := fmt.Sprintf("%s", got)
 		assert.Equal(t, expected, result)
 	})
 }
