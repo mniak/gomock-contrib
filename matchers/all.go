@@ -42,9 +42,8 @@ func (m allMatcher) String() string {
 }
 
 func (m allMatcher) Got(arg any) string {
-	fallbackMessage := utils.PrettyPrint(arg)
 	if m.submatchers == nil {
-		return fallbackMessage
+		return utils.PrettyPrint(arg)
 	}
 	presenceList := make(map[string]bool)
 	resultList := make([]string, 0)
@@ -62,7 +61,7 @@ func (m allMatcher) Got(arg any) string {
 		resultList = append(resultList, result)
 	}
 	if len(resultList) == 0 {
-		return fallbackMessage
+		return utils.PrettyPrint(arg)
 	}
 	return strings.Join(resultList, ";\n")
 }
