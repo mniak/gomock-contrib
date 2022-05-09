@@ -386,7 +386,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 		{
 			name:            "empty map",
 			expectedMap:     map[string]any{},
-			expectedMessage: "matches map[string]any{}",
+			expectedMessage: "matches (map[string]interface {}) {\n}\n",
 		},
 		{
 			name: "basic map with 2 fields",
@@ -394,10 +394,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 				"field1": "value1",
 				"field2": 2,
 			},
-			expectedMessage: `matches map[string]any{
-	"field1": "value1",
-	"field2": 2,
-}`,
+			expectedMessage: "matches (map[string]interface {}) (len=2) {\n\t(string) (len=6) \"field1\": (string) (len=6) \"value1\",\n\t(string) (len=6) \"field2\": (int) 2\n}\n",
 		},
 		{
 			name: "map with submap",
@@ -407,12 +404,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 					"field2": 2,
 				},
 			},
-			expectedMessage: `matches map[string]any{
-	"submap": map[string]any{
-		"field1": "value1",
-		"field2": 2,
-	},
-}`,
+			expectedMessage: "matches (map[string]interface {}) (len=1) {\n\t(string) (len=6) \"submap\": (map[string]interface {}) (len=2) {\n\t\t(string) (len=6) \"field1\": (string) (len=6) \"value1\",\n\t\t(string) (len=6) \"field2\": (int) 2\n\t}\n}\n",
 		},
 		{
 			name: "map with slice",
@@ -422,12 +414,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 					"slice item 2",
 				},
 			},
-			expectedMessage: `matches map[string]any{
-	"slice": []string{
-		"slice item 1",
-		"slice item 2",
-	},
-}`,
+			expectedMessage: "matches (map[string]interface {}) (len=1) {\n\t(string) (len=5) \"slice\": ([]string) (len=2 cap=2) {\n\t\t(string) (len=12) \"slice item 1\",\n\t\t(string) (len=12) \"slice item 2\"\n\t}\n}\n",
 		},
 		{
 			name: "stringable struct on want",
@@ -436,9 +423,7 @@ func TestLikeMapMatcher_WantString(t *testing.T) {
 					Text: "inner message",
 				},
 			},
-			expectedMessage: `matches map[string]any{
-	"stringable": "inner message",
-}`,
+			expectedMessage: "matches (map[string]interface {}) (len=1) {\n\t(string) (len=10) \"stringable\": (matchers.Stringable) inner message\n}\n",
 		},
 	}
 	for _, td := range testdata {
@@ -463,7 +448,7 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 		{
 			name:            "empty map",
 			data:            map[string]any{},
-			expectedMessage: "is map[string]any{}",
+			expectedMessage: "is (map[string]interface {}) {\n}\n",
 		},
 		{
 			name: "stringable struct on got",
@@ -472,9 +457,7 @@ func TestLikeMapMatcher_GotString(t *testing.T) {
 					Text: "hello world",
 				},
 			},
-			expectedMessage: `is map[string]any{
-	"stringable": "hello world",
-}`,
+			expectedMessage: "is (map[string]interface {}) (len=1) {\n\t(string) (len=10) \"stringable\": (matchers.Stringable) hello world\n}\n",
 		},
 	}
 	for _, td := range testdata {
@@ -509,14 +492,10 @@ func TestLikeMap_AcceptMatchersInFields(t *testing.T) {
 			})
 			assert.Equal(t, b, sut.Matches(sample))
 
-			expectedWant := fmt.Sprintf(`matches map[string]any{
-	"Field": "%s",
-}`, fakeSubMatcherWant)
+			expectedWant := fmt.Sprintf("matches (map[string]interface {}) (len=1) {\n\t(string) (len=5) \"Field\": (*mocks.MockMatcherGotFormatter)(%s)\n}\n", fakeSubMatcherWant)
 			assert.Equal(t, expectedWant, sut.String())
 
-			expectedGot := fmt.Sprintf(`is map[string]any{
-	"Field": "%s",
-}`, fakeValue)
+			expectedGot := fmt.Sprintf("is (map[string]interface {}) (len=1) {\n\t(string) (len=5) \"Field\": (string) (len=18) \"%s\"\n}\n", fakeValue)
 
 			assert.Equal(t, expectedGot, sut.Got(sample))
 		})

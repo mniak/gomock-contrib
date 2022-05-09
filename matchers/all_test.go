@@ -108,9 +108,10 @@ func TestAll_GotMessage(t *testing.T) {
 		}
 		sut := All()
 		got := sut.Got(sample)
-		assert.Equal(t, `map[string]any{
-	"key1": 1234,
-}`, got)
+		assert.Equal(t, `(map[string]interface {}) (len=1) {
+	(string) (len=4) "key1": (int) 1234
+}
+`, got)
 	})
 	t.Run("When messages different, should list both", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
