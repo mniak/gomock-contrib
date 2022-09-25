@@ -1,6 +1,6 @@
 module github.com/mniak/gomock-contrib
 
-go 1.18
+go 1.19
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.16.0
