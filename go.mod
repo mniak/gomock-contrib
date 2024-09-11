@@ -1,9 +1,11 @@
 module github.com/mniak/gomock-contrib
 
-go 1.18
+go 1.21
+
+toolchain go1.23.1
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.16.0
+	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
 	github.com/stretchr/testify v1.7.1
