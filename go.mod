@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/brianvoe/gofakeit/v6 v6.16.0
 	github.com/golang/mock v1.6.0
-	github.com/google/uuid v1.3.0
+	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.7.1
 	golang.org/x/exp v0.0.0-20220428152302-39d4317da171
 )
